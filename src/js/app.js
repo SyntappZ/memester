@@ -1,7 +1,7 @@
 // Import Vue
 import Vue from 'vue';
 import VueMasonry from 'vue-masonry-css'
-
+import VueLazyload from 'vue-lazyload'
 // Import Framework7
 import Framework7 from 'framework7/framework7.esm.bundle.js';
 
@@ -23,6 +23,11 @@ import store from './store'
 Framework7.use(Framework7Vue);
 
 Vue.use(VueMasonry);
+
+Vue.use(VueLazyload, {
+  preLoad: 1.5,
+  
+})
 
 // Init App
 new Vue({

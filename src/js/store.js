@@ -57,55 +57,7 @@ export default new Vuex.Store({
       });
     }
 
-    // loadInfo({ commit }) {
-    //   let all = []
-    //     axios({
-    //       method: "get",
-    //       url:
-    //         "https://api.imgur.com/3/gallery/hot/top/1/day",
-    //       headers: {
-    //         Authorization: "Client-ID 7711bc539737c6e"
-    //       },
-
-    //     })
-    //       .then(response => {
-    //         let images = response.data.data;
-
-    //         images.forEach(x => {
-    //           let url = "";
-
-    //           let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
-
-    //           let linkCheck = reg.test(x.link);
-    //           if (linkCheck) {
-    //             url = x.link;
-    //           } else {
-    //             url = x.images[0].link;
-    //           }
-
-    //           let tags = x.tags.map(x => x.name);
-
-    //           all.push({
-    //             id: x.id,
-    //             desc: x.title,
-    //             link: url,
-    //             tags: tags,
-    //             loaded: false
-    //           });
-
-    //         });
-
-    //       })
-    //       .catch(function(error) {
-    //         console.log(error);
-    //       })
-    //       .finally(() => {
-    //         commit('trending', all)
-
-    //       })
-
-    //},
-
+   
     // imageSearch({ commit }, name) {
     //   for (let i = 1; i <= 3; i++) {
     //     axios({

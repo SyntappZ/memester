@@ -3,13 +3,26 @@
     <div class="wrap">
       <masonry :cols="col" :gutter="10">
         <div v-for="(img, index) in images" :key="index">
-          <img :src="img.link" alt />
+            <transition name="fade" appear>
+            <img
+           
+           v-lazy="img.link"
+          
+          
+           >
+            </transition>
+          <!-- <f7-block class="row align-items-stretch text-align-center">
+            <f7-col>
+              <f7-preloader class="loader" color="red"></f7-preloader>
+            </f7-col>
+          </f7-block> -->
+           
         </div>
       </masonry>
     </div>
   </div>
 </template>
-
+//  >
 <script>
 import cordovaApp from "../js/cordova-app.js";
 import { setTimeout } from "timers";
@@ -29,6 +42,7 @@ export default {
     this.$store.dispatch("loadInfo").then(
       response => {
         this.images = response;
+        console.log(response);
       },
       error => {
         console.error(
@@ -38,7 +52,15 @@ export default {
     );
   },
   created() {},
-  watch: {}
+  watch: {},
+  //  directives: {
+  //   loadedifcomplete(el, binding) {
+  //      if (el.complete) {
+  //        binding.value.loaded = true;
+  //        console.log(binding.value.loaded)
+  //      }
+  //   }
+  // }
 };
 </script>
 
@@ -52,4 +74,12 @@ img {
   width: 95%;
   margin: 20px auto 0 auto;
 }
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to  {
+  opacity: 0;
+}
+
 </style>
