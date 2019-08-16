@@ -1,5 +1,6 @@
 // Import Vue
 import Vue from 'vue';
+import VueMasonry from 'vue-masonry-css'
 
 // Import Framework7
 import Framework7 from 'framework7/framework7.esm.bundle.js';
@@ -16,11 +17,12 @@ import '../css/app.css';
 
 // Import App Component
 import App from '../components/app.vue';
-import { VueMasonryPlugin } from 'vue-masonry';
+
 import store from './store'
 // Init Framework7-Vue Plugin
 Framework7.use(Framework7Vue);
-Vue.use(VueMasonryPlugin)
+
+Vue.use(VueMasonry);
 
 // Init App
 new Vue({

@@ -1,11 +1,11 @@
 <template>
   <div class="images text-color-white">
-   
-
-    <div class="img-container" v-masonry transition-duration="0.3s" item-selector=".item">
-      <div v-masonry-tile class="item" v-for="img in images" :key="img.id">
-        <img :src="img.link" class="lazyload" />
-      </div>
+    <div class="wrap">
+      <masonry :cols="col" :gutter="10">
+        <div v-for="(img, index) in images" :key="index">
+          <img :src="img.link" alt />
+        </div>
+      </masonry>
     </div>
   </div>
 </template>
@@ -19,31 +19,37 @@ export default {
   data() {
     return {
       images: [],
-     
+      col: 2
     };
   },
-  created() {
-    this.$store.dispatch("loadInfo");
-    setTimeout(() => {
-      this.images = this.$store.state.images;
-    }, 200);
-  }
+  mounted() {
+    if (window.innerWidth > 600) {
+      this.col = 4;
+    }
+    this.$store.dispatch("loadInfo").then(
+      response => {
+        this.images = response;
+      },
+      error => {
+        console.error(
+          "Got nothing from server. Prompt user to check internet connection and try again"
+        );
+      }
+    );
+  },
+  created() {},
+  watch: {}
 };
 </script>
 
 <style scoped>
-.img-container {
+img {
   width: 100%;
-
-  
-}
-.item {
-  width: 50%;
-  box-sizing: border-box;
-  padding: 0 5px;
-}
-.item img {
-  max-width: 100%;
+  margin: 3px 0;
   border-radius: 5px;
+}
+.wrap {
+  width: 95%;
+  margin: 20px auto 0 auto;
 }
 </style>
