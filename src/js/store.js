@@ -26,7 +26,7 @@ export default new Vuex.Store({
 
             images.forEach(x => {
               let url = "";
-
+             
               let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
 
               let linkCheck = reg.test(x.link);
@@ -36,18 +36,23 @@ export default new Vuex.Store({
                 url = x.images[0].link;
               }
 
-              let tags = x.tags.map(x => x.name);
+            
 
+              let tags = x.tags.map(x => x.name);
+              let loader = require('../loading.svg')
               all.push({
                 id: x.id,
                 desc: x.title,
-                link: url,
+                link: {
+                  src: url,
+                  loading: loader,
+                },
                 tags: tags,
                 loaded: false
               });
             });
-
-            let noMP4 = all.filter(x => !x.link.match(/mp4$/));
+            
+           let noMP4 = all.filter(x => !x.link.src.match(/mp4$/));
 
             resolve(noMP4);
           })
