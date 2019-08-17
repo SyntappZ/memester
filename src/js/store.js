@@ -10,18 +10,19 @@ export default new Vuex.Store({
   },
   mutations: {},
   actions: {
-    loadInfo(context, data) {
+    loadInfo(context, page) {
       return new Promise((resolve, reject) => {
         
         axios({
           method: "get",
-          url: "https://api.imgur.com/3/gallery/hot/top/1/day",
+          url: `https://api.imgur.com/3/gallery/hot/top/day/${page}`,
           headers: {
             Authorization: "Client-ID 7711bc539737c6e"
           }
         })
           .then(response => {
             let images = response.data.data;
+         
             let all = [];
 
             images.forEach(x => {
@@ -48,12 +49,14 @@ export default new Vuex.Store({
                   loading: loader,
                 },
                 tags: tags,
-                loaded: false
+                image: url,
+                height: x.cover_height
               });
             });
             
-           let noMP4 = all.filter(x => !x.link.src.match(/mp4$/));
-
+           let noMP4 = all.filter(x => !x.link.src.match(/mp4$/)).filter(x => x.height < 1000)
+          
+            
             resolve(noMP4);
           })
           .catch(function(error) {

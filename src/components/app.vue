@@ -20,21 +20,8 @@
   <f7-view main class="safe-areas" url="/"></f7-view>
 
 
-  <!-- Popup -->
-  <f7-popup id="my-popup" swipe-to-close>
-    <f7-view>
-      <f7-page>
-        <f7-navbar title="Popup">
-          <f7-nav-right>
-            <f7-link popup-close>Close</f7-link>
-          </f7-nav-right>
-        </f7-navbar>
-        <f7-block>
-          <p>jeff is my name</p>
-        </f7-block>
-      </f7-page>
-    </f7-view>
-  </f7-popup>
+ 
+ 
 
  
 </f7-app>
@@ -88,7 +75,8 @@
     methods: {
       alertLoginData() {
         this.$f7.dialog.alert('Username: ' + this.username + '<br>Password: ' + this.password);
-      }
+      },
+     
     },
     mounted() {
       this.$f7ready((f7) => {
@@ -104,49 +92,26 @@
 
 <style>
 
-.text-color-primary {
-  --f7-theme-color-text-color: var(--f7-theme-color);
-}
+
 .bg-color-primary {
   --f7-theme-color-bg-color: var(--f7-theme-color);
 }
-.border-color-primary {
-  --f7-theme-color-border-color: var(--f7-theme-color);
+
+
+
+.text-color-white {
+  --f7-theme-color-text-color: #fff;
 }
-.ripple-color-primary {
-  --f7-theme-color-ripple-color: rgba(var(--f7-theme-color-rgb), 0.3);
+.text-color-green {
+  --f7-theme-color-text-color: rgb(8, 218, 8)
+}
+.text-color-black {
+  --f7-theme-color-text-color: #333;
 }
 
-.text-color-secondary {
-  --f7-theme-color-text-color: var( --f7-theme-color-shade);
-}
-.bg-color-secondary {
-  --f7-theme-color-bg-color: var( --f7-theme-color-shade);
-}
-.border-color-secondary {
-  --f7-theme-color-border-color: var( --f7-theme-color-shade);
-}
-.ripple-color-secondary {
-  --f7-theme-color-ripple-color: rgba(var( --f7-theme-color-shade), 0.3);
-}
-
-.text-color-yel {
-  --f7-theme-color-text-color: #EBB11A
-}
-.bg-color-yel {
-  --f7-theme-color-bg-color: #EBB11A
-}
-.border-color-yel {
-  --f7-theme-color-border-color: #EBB11A
-}
-.ripple-color-yel {
-  --f7-theme-color-ripple-color: #EBB11A
-}
 :root {
-  --f7-theme-color: #01213D;
-  --f7-theme-color-shade: #046CC9;
-  --f7-theme-color-tint: #034A8A;
- 
+  --f7-theme-color: rgb(34, 34, 34);
+  
 }
 
 </style>
