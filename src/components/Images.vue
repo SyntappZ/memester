@@ -11,7 +11,12 @@
         </div>
       </masonry>
     </div>
-    <f7-button flat class="btn text-color-white" @click="loadMoreImages">Load More</f7-button>
+    <f7-button
+      v-if="images.length > 0"
+      flat
+      class="btn text-color-white"
+      @click="loadMoreImages"
+    >Load More</f7-button>
 
     <f7-popup
       class="my-popup"
@@ -29,8 +34,6 @@
               </div>
               <h1>memester</h1>
             </div>
-
-            
           </f7-block>
 
           <f7-block>
@@ -39,11 +42,11 @@
               <img class="chosenImage" :src="image" alt />
             </div>
           </f7-block>
-          
+
           <f7-block>
             <f7-row>
               <f7-col>
-                <f7-button  @click="shareImage" color="green" outline>share</f7-button>
+                <f7-button @click="shareImage" color="green" outline>share</f7-button>
               </f7-col>
             </f7-row>
           </f7-block>
@@ -51,8 +54,28 @@
           <f7-block>
             <div v-if="tags.length > 0" class="tag-wrap">
               <div class="btn-wrap" v-for="(tag , i) in tags" :key="i">
-                <button class="tag" fill>{{ tag }}</button>
+                <button class="tag" @click="pageOne(tag)" fill>{{ tag }}</button>
               </div>
+            </div>
+          </f7-block>
+          <f7-block>
+            <div class="images text-color-white">
+              <div class="tag-image-wrap">
+                <masonry :cols="col" :gutter="10">
+                  <div v-for="(img, index) in tagImages" :key="index">
+                    <img
+                      v-lazy="img.link"
+                      @click="getImageData(img.id, img.image, img.desc, img.tags)"
+                    />
+                  </div>
+                </masonry>
+              </div>
+              <f7-button
+                v-if="tagImages.length > 0"
+                flat
+                class="btn text-color-white"
+                @click="loadMoreTags()"
+              >Load More</f7-button>
             </div>
           </f7-block>
         </f7-page>
@@ -72,11 +95,16 @@ export default {
       images: [],
       col: 2,
       i: 2,
+      t: 2,
       open: false,
       description: "",
       image: "",
       tags: [],
-      favorite: false
+      favorite: false,
+      tag: "",
+      array: "pageLoad",
+      tagImages: [],
+      tagType: ''
     };
   },
   mounted() {
@@ -89,10 +117,33 @@ export default {
   created() {},
   methods: {
     getImageData(id, image, desc, tags) {
+      this.$store.state.page = 1;
       this.open = true;
       this.description = desc;
       this.image = image;
       this.tags = tags;
+
+      //console.log(this.tags)
+
+      this.getTagImages(this.tags);
+      this.scrollToTop();
+    },
+    scrollToTop() {
+     let wrap = document.querySelector('.images');
+     wrap.scrollToTop
+     //wrap.scrollHeight = 0;
+    },
+   
+
+    loadMoreTags() {
+      
+      this.$store.dispatch("incrementPage");
+      if(this.tagType == 'tags') {
+        this.getTagImages(this.tags)
+      }else{
+        this.getSingleTag(this.tag);
+      }
+      
     },
     loadMoreImages() {
       this.loadImages(this.i);
@@ -101,32 +152,91 @@ export default {
     closePopUp() {
       this.open = false;
     },
-     shareImage() {
-            var options = {
-              files: [this.image]
-            };
+    shareImage() {
+      var options = {
+        files: [this.image]
+      };
 
-            var onSuccess = function(result) {
-              // window.plugins.socialsharing.shareViaWhatsApp(null, url,  null, function() {console.log('share ok')}, function(errormsg){alert(errormsg)})
-              console.log("Share completed? " + result.completed); // On Android apps mostly return false even while it's true
-              console.log("Shared to app: " + result.app); // On Android result.app since plugin version 5.4.0 this is no longer empty. On iOS it's empty when sharing is cancelled (result.completed=false)
-            };
+      var onSuccess = function(result) {
+        console.log("Share completed? " + result.completed);
+        console.log("Shared to app: " + result.app);
+      };
 
-            var onError = function(msg) {
-              console.log("Sharing failed with message: " + msg);
-            };
+      var onError = function(msg) {
+        console.log("Sharing failed with message: " + msg);
+      };
 
-            window.plugins.socialsharing.shareWithOptions(
-              options,
-              onSuccess,
-              onError
-            );
-          },
+      window.plugins.socialsharing.shareWithOptions(
+        options,
+        onSuccess,
+        onError
+      );
+    },
 
     loadImages(page) {
       this.$store.dispatch("loadInfo", page).then(
         response => {
+          response = response.sort(() => Math.random() - 0.5);
           response.forEach(x => this.images.push(x));
+        },
+        error => {
+          console.error("Got nothing from server");
+        }
+      );
+    },
+     pageOne(tag) {
+        window.scrollTo(0, 500);
+       this.tagType = 'tag'
+      this.$store.state.page = 1
+        let page = this.$store.state.page;
+     
+      this.$store.dispatch("singleTag", tag).then(
+        response => {
+          response = response.sort(() => Math.random() - 0.5);
+          if (page > 1) {
+            response.forEach(x => this.tagImages.push(x));
+          } else {
+            this.tagImages = response;
+          }
+        },
+        error => {
+          console.error("Got nothing from server");
+        }
+      );
+    },
+
+    getTagImages(tags) {
+      this.tagType = 'tags'
+      let page = this.$store.state.page;
+
+      console.log(page);
+
+      this.$store.dispatch("tagImages", tags).then(
+        response => {
+          response = response.sort(() => Math.random() - 0.5);
+          if (page > 1) {
+            response.forEach(x => this.tagImages.push(x));
+          } else {
+            this.tagImages = response;
+          }
+        },
+        error => {
+          console.error("Got nothing from server");
+        }
+      );
+    },
+    getSingleTag(tag) {
+       this.tagType = 'tag'
+      let page = this.$store.state.page;
+      console.log(page);
+      this.$store.dispatch("singleTag", tag).then(
+        response => {
+          response = response.sort(() => Math.random() - 0.5);
+          if (page > 1) {
+            response.forEach(x => this.tagImages.push(x));
+          } else {
+            this.tagImages = response;
+          }
         },
         error => {
           console.error("Got nothing from server");
@@ -134,7 +244,12 @@ export default {
       );
     }
   },
-  watch: {}
+  watch: {},
+  computed: {
+    // pageChange() {
+    //   return this.$store.state.page
+    // }
+  }
 };
 </script>
 
@@ -165,6 +280,10 @@ img[lazy="loaded"] {
 }
 .wrap {
   width: 95%;
+  margin: 20px auto 0 auto;
+}
+.tag-image-wrap {
+  width: 100%;
   margin: 20px auto 0 auto;
 }
 .title-wrap {
@@ -199,7 +318,7 @@ img[lazy="loaded"] {
   margin: 0 2px;
 }
 .chosenImage {
- border-radius: 7px;
+  border-radius: 7px;
 }
 .tag {
   color: #000;
@@ -212,6 +331,6 @@ img[lazy="loaded"] {
   font-weight: 700;
 }
 .tag:focus {
-  outline:none;
+  outline: none;
 }
 </style>
