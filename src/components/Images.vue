@@ -43,7 +43,7 @@
           <f7-block>
             <f7-row>
               <f7-col>
-                <f7-button color="green" outline>share</f7-button>
+                <f7-button  @click="shareImage" color="green" outline>share</f7-button>
               </f7-col>
             </f7-row>
           </f7-block>
@@ -101,6 +101,27 @@ export default {
     closePopUp() {
       this.open = false;
     },
+     shareImage() {
+            var options = {
+              files: [this.image]
+            };
+
+            var onSuccess = function(result) {
+              // window.plugins.socialsharing.shareViaWhatsApp(null, url,  null, function() {console.log('share ok')}, function(errormsg){alert(errormsg)})
+              console.log("Share completed? " + result.completed); // On Android apps mostly return false even while it's true
+              console.log("Shared to app: " + result.app); // On Android result.app since plugin version 5.4.0 this is no longer empty. On iOS it's empty when sharing is cancelled (result.completed=false)
+            };
+
+            var onError = function(msg) {
+              console.log("Sharing failed with message: " + msg);
+            };
+
+            window.plugins.socialsharing.shareWithOptions(
+              options,
+              onSuccess,
+              onError
+            );
+          },
 
     loadImages(page) {
       this.$store.dispatch("loadInfo", page).then(
