@@ -28,9 +28,9 @@
         <f7-page class="pop">
           <f7-block>
             <div class="title-wrap">
-              <div class="icon-wrap">
-                <f7-icon v-if="favorite" right material="favoriter"></f7-icon>
-                <f7-icon v-else @click="favorite = true" material="favorite_border"></f7-icon>
+              <div @click="addToFavorites" class="icon-wrap">
+                <f7-icon v-if="favorite == true" material="favorite"></f7-icon>
+                <f7-icon v-else material="favorite_border"></f7-icon>
               </div>
               <h1>memester</h1>
             </div>
@@ -65,7 +65,7 @@
                   <div v-for="(img, index) in tagImages" :key="index">
                     <img
                       v-lazy="img.link"
-                      @click="getImageData(img.id, img.image, img.desc, img.tags)"
+                      @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite)"
                     />
                   </div>
                 </masonry>
@@ -100,11 +100,11 @@ export default {
       description: "",
       image: "",
       tags: [],
-      favorite: false,
+      favorite: "",
       tag: "",
       array: "pageLoad",
       tagImages: [],
-      tagType: ''
+      tagType: ""
     };
   },
   mounted() {
@@ -116,34 +116,33 @@ export default {
   },
   created() {},
   methods: {
-    getImageData(id, image, desc, tags) {
+    getImageData(id, image, desc, tags, favorite) {
       this.$store.state.page = 1;
       this.open = true;
       this.description = desc;
       this.image = image;
       this.tags = tags;
-
-      //console.log(this.tags)
+      this.favorite = favorite;
 
       this.getTagImages(this.tags);
       this.scrollToTop();
     },
     scrollToTop() {
-     let wrap = document.querySelector('.images');
-     wrap.scrollToTop
-     //wrap.scrollHeight = 0;
+      let wrap = document.querySelector(".images");
+      wrap.scrollToTop;
     },
-   
+    addToFavorites() {
+      this.favorite = true;
+      console.log(this.favorite);
+    },
 
     loadMoreTags() {
-      
       this.$store.dispatch("incrementPage");
-      if(this.tagType == 'tags') {
-        this.getTagImages(this.tags)
-      }else{
+      if (this.tagType == "tags") {
+        this.getTagImages(this.tags);
+      } else {
         this.getSingleTag(this.tag);
       }
-      
     },
     loadMoreImages() {
       this.loadImages(this.i);
@@ -184,12 +183,12 @@ export default {
         }
       );
     },
-     pageOne(tag) {
-        window.scrollTo(0, 500);
-       this.tagType = 'tag'
-      this.$store.state.page = 1
-        let page = this.$store.state.page;
-     
+    pageOne(tag) {
+      window.scrollTo(0, 500);
+      this.tagType = "tag";
+      this.$store.state.page = 1;
+      let page = this.$store.state.page;
+      this.tag = tag;
       this.$store.dispatch("singleTag", tag).then(
         response => {
           response = response.sort(() => Math.random() - 0.5);
@@ -206,11 +205,8 @@ export default {
     },
 
     getTagImages(tags) {
-      this.tagType = 'tags'
+      this.tagType = "tags";
       let page = this.$store.state.page;
-
-      console.log(page);
-
       this.$store.dispatch("tagImages", tags).then(
         response => {
           response = response.sort(() => Math.random() - 0.5);
@@ -226,9 +222,8 @@ export default {
       );
     },
     getSingleTag(tag) {
-       this.tagType = 'tag'
+      this.tagType = "tag";
       let page = this.$store.state.page;
-      console.log(page);
       this.$store.dispatch("singleTag", tag).then(
         response => {
           response = response.sort(() => Math.random() - 0.5);
@@ -245,11 +240,7 @@ export default {
     }
   },
   watch: {},
-  computed: {
-    // pageChange() {
-    //   return this.$store.state.page
-    // }
-  }
+  computed: {}
 };
 </script>
 

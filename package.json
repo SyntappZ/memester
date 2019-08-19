@@ -1,8 +1,8 @@
 {
-  "name": "share-master",
+  "name": "memester",
   "private": true,
   "version": "1.0.0",
-  "description": "share-master",
+  "description": "memester",
   "repository": "",
   "license": "UNLICENSED",
   "framework7": {
@@ -10,7 +10,7 @@
     "type": [
       "cordova"
     ],
-    "name": "share-master",
+    "name": "memester",
     "framework": "vue",
     "template": "single-view",
     "bundler": "webpack",
