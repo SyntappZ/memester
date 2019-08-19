@@ -29,9 +29,9 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         let memeArray = [];
         let done = 0;
-        let memes = ['memes', 'funny', 'gifs', 'dank_memes', 'funny_gifs']
+        let memes = ['memes', 'funny', 'like_a_boss', 'dank_memes', 'nailed_it', 'florida_man']
         let len = memes.length;
-        for (let i = 0; i < memes.length; i++) {
+        for (let i = 0; i < len; i++) {
           axios({
             method: "get",
             url: `https://api.imgur.com/3/gallery/t/${memes[i]}/top/all/${page}`,
@@ -76,7 +76,7 @@ export default new Vuex.Store({
 
               let tagsAdded = 0;
               let noMP4 = all
-                .filter(x => !x.link.src.match(/mp4$/))
+                .filter(x => !x.link.src.match(/mp4$|gif$/))
                 .filter(x => x.height < 1000);
 
               noMP4.forEach(x => {
@@ -157,7 +157,7 @@ export default new Vuex.Store({
 
               let tagsAdded = 0;
               let noMP4 = all
-                .filter(x => !x.link.src.match(/mp4$/))
+                .filter(x => !x.link.src.match(/mp4$|gif$/))
                 .filter(x => x.height < 1000);
 
               
@@ -240,7 +240,7 @@ export default new Vuex.Store({
 
               let tagsAdded = 0;
               let noMP4 = all
-                .filter(x => !x.link.src.match(/mp4$/))
+                .filter(x => !x.link.src.match(/mp4$|gif$/))
                 .filter(x => x.height < 1000);
 
               

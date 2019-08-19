@@ -109,7 +109,11 @@ export default {
   },
   mounted() {
     this.loadImages(1);
-
+    let wrap = document.querySelector(".pop");
+    
+      window.addEventListener('scroll', () => {
+       console.log('scrolling')
+      })
     if (window.innerWidth > 600) {
       this.col = 4;
     }
@@ -128,12 +132,12 @@ export default {
       this.scrollToTop();
     },
     scrollToTop() {
-      let wrap = document.querySelector(".images");
-      wrap.scrollToTop;
+    
+      
     },
     addToFavorites() {
-      this.favorite = true;
-      console.log(this.favorite);
+      
+      
     },
 
     loadMoreTags() {
