@@ -1,11 +1,11 @@
 <template >
-  <div class="images text-color-white">
+  <f7-page class="images text-color-white" >
     <div class="wrap">
       <masonry :cols="col" :gutter="10">
         <div v-for="(img, index) in images" :key="index">
           <img
             v-lazy="img.link"
-            @click="getImageData(img.id, img.image, img.desc, img.tags)"
+            @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite)"
             popup-open=".my-popup"
           />
         </div>
@@ -24,10 +24,14 @@
       swipe-to-close="to-bottom"
       @popup:closed="open = false"
     >
-      <f7-view>
-        <f7-page class="pop">
+      <f7-view
+        name="popup"
+       
+      >
+        <f7-page class="pop" >
+          
           <f7-block>
-            <div class="title-wrap">
+            <div class="title-wrap" id="top">
               <div @click="addToFavorites" class="icon-wrap">
                 <f7-icon v-if="favorite == true" material="favorite"></f7-icon>
                 <f7-icon v-else material="favorite_border"></f7-icon>
@@ -70,6 +74,7 @@
                   </div>
                 </masonry>
               </div>
+
               <f7-button
                 v-if="tagImages.length > 0"
                 flat
@@ -81,7 +86,7 @@
         </f7-page>
       </f7-view>
     </f7-popup>
-  </div>
+  </f7-page>
 </template>
 
 <script>
@@ -104,16 +109,18 @@ export default {
       tag: "",
       array: "pageLoad",
       tagImages: [],
-      tagType: ""
+      tagType: "",
+      reload: false,
     };
   },
   mounted() {
     this.loadImages(1);
-    let wrap = document.querySelector(".pop");
+
     
-      window.addEventListener('scroll', () => {
-       console.log('scrolling')
-      })
+    setTimeout(() => {
+      //console.log(wrap.scrollTop);
+    }, 5000);
+
     if (window.innerWidth > 600) {
       this.col = 4;
     }
@@ -129,16 +136,11 @@ export default {
       this.favorite = favorite;
 
       this.getTagImages(this.tags);
-      this.scrollToTop();
-    },
-    scrollToTop() {
+     
     
-      
     },
-    addToFavorites() {
-      
-      
-    },
+    scrollToTop() {},
+    addToFavorites() {},
 
     loadMoreTags() {
       this.$store.dispatch("incrementPage");
@@ -252,6 +254,9 @@ export default {
 .image-wrap {
   margin: auto;
 }
+.images {
+  background-color: #222;
+}
 img {
   width: 100%;
   margin: 3px 0;
@@ -286,6 +291,10 @@ img[lazy="loaded"] {
   justify-content: space-between;
   align-content: flex-start;
   flex-direction: row-reverse;
+}
+.link {
+  color: white;
+  cursor: pointer;
 }
 .title-wrap h1 {
   margin: 0;
