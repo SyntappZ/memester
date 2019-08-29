@@ -79,6 +79,9 @@ var cordovaApp = {
       }
     }, true);
   },
+ 
+
+
   init: function (f7) {
     // Save f7 instance
     cordovaApp.f7 = f7;
@@ -91,6 +94,8 @@ var cordovaApp = {
 
     // Handle Keyboard
     cordovaApp.handleKeyboard();
+
+   
   },
 };
 export default cordovaApp;

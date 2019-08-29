@@ -10,18 +10,28 @@ export default new Vuex.Store({
     images: [],
     tags: [],
     page: 1,
+    imageType: 'images'
     
   },
   mutations: {
     incrementPage(state) {
       state.page++
-      
+    },
+    imageType(state, type) {
+      state.imageType = type
+      //console.log(state.imageType)
     }
+  },
+  getters: {
+    imageType: state => state.imageType,
   },
   actions: {
     incrementPage(context) {
       context.commit('incrementPage')
       
+    },
+    imageType({ commit }, type) {
+      commit('imageType', type)
     },
     loadInfo(context, page) {
       
@@ -29,7 +39,17 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         let memeArray = [];
         let done = 0;
-        let memes = ['memes', 'funny', 'like_a_boss', 'dank_memes', 'nailed_it', 'florida_man']
+        let memes
+        if(this.state.imageType == 'images') {
+          memes = ['memes', 'funny', 'like_a_boss', 'dank_memes', 'nailed_it', 'florida_man']
+        }else{
+          memes = ['memes', 'funny', 'like_a_boss', 'dank_memes', 'nailed_it', 'florida_man', 'gifs']
+        }
+        
+
+        
+        
+        
         let len = memes.length;
         for (let i = 0; i < len; i++) {
           axios({
@@ -75,9 +95,17 @@ export default new Vuex.Store({
               });
 
               let tagsAdded = 0;
-              let noMP4 = all
-                .filter(x => !x.link.src.match(/mp4$|gif$/))
-                .filter(x => x.height < 1000);
+              let noMP4 
+              
+              if(this.state.imageType == 'images') {
+                noMP4 = all
+               .filter(x => !x.link.src.match(/mp4$|gif$/))
+               .filter(x => x.height < 1000);
+             }else{
+               noMP4 = all
+               .filter(x => x.link.src.match(/gif$/))
+               .filter(x => x.height < 1000);
+             }
 
               noMP4.forEach(x => {
                 memeArray.push(x);
@@ -156,9 +184,18 @@ export default new Vuex.Store({
               });
 
               let tagsAdded = 0;
-              let noMP4 = all
-                .filter(x => !x.link.src.match(/mp4$|gif$/))
-                .filter(x => x.height < 1000);
+              let noMP4 
+              
+              if(this.state.imageType == 'images') {
+                noMP4 = all
+               .filter(x => !x.link.src.match(/mp4$|gif$/))
+               .filter(x => x.height < 1000);
+             }else{
+               noMP4 = all
+               .filter(x => x.link.src.match(/gif$/))
+               .filter(x => x.height < 1000);
+             }
+             
 
               
                 

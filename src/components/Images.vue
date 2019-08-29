@@ -1,6 +1,8 @@
 <template >
-  <f7-page class="images text-color-white" >
+  <f7-page name="home" class="images text-color-white">
+    
     <div class="wrap">
+       
       <masonry :cols="col" :gutter="10">
         <div v-for="(img, index) in images" :key="index">
           <img
@@ -11,6 +13,11 @@
         </div>
       </masonry>
     </div>
+   
+      <f7-fab v-if="homeScrolled" position="right-bottom" @click="scrollToTop" slot="fixed" color="green">
+        <f7-icon material="keyboard_arrow_up"></f7-icon>
+      </f7-fab>
+    
     <f7-button
       v-if="images.length > 0"
       flat
@@ -24,26 +31,24 @@
       swipe-to-close="to-bottom"
       @popup:closed="open = false"
     >
-      <f7-view
-        name="popup"
+      <f7-view>
        
-      >
-        <f7-page class="pop" >
-          
+        <f7-page class="pop">
+          <p class="pull text-color-white">&darr; pull to close &darr;</p>
           <f7-block>
             <div class="title-wrap" id="top">
               <div @click="addToFavorites" class="icon-wrap">
                 <f7-icon v-if="favorite == true" material="favorite"></f7-icon>
                 <f7-icon v-else material="favorite_border"></f7-icon>
               </div>
-              <h1>memester</h1>
+              <h1 class="meme-title">memester</h1>
             </div>
           </f7-block>
 
           <f7-block>
             <f7-block-header class="text-color-white">{{ description }}</f7-block-header>
             <div class="image-wrap">
-              <img class="chosenImage" :src="image" alt />
+              <img class="chosenImage" :src="image" />
             </div>
           </f7-block>
 
@@ -62,6 +67,11 @@
               </div>
             </div>
           </f7-block>
+         
+            <f7-fab v-if="popupScrolled" position="right-bottom" slot="fixed" @click="scrollToTop" color="green">
+              <f7-icon material="keyboard_arrow_up"></f7-icon>
+            </f7-fab>
+          
           <f7-block>
             <div class="images text-color-white">
               <div class="tag-image-wrap">
@@ -86,13 +96,15 @@
         </f7-page>
       </f7-view>
     </f7-popup>
+   
   </f7-page>
 </template>
 
 <script>
 import cordovaApp from "../js/cordova-app.js";
 import { setTimeout } from "timers";
-
+import { mapGetters } from "vuex";
+import $$ from "Dom7";
 export default {
   components: {},
   data() {
@@ -110,16 +122,32 @@ export default {
       array: "pageLoad",
       tagImages: [],
       tagType: "",
-      reload: false,
+      homeScrolled: false,
+      popupScrolled: false,
+     
     };
   },
+  created() {},
   mounted() {
-    this.loadImages(1);
-
     
-    setTimeout(() => {
-      //console.log(wrap.scrollTop);
-    }, 5000);
+    
+    this.loadImages(1);
+    let page = $$(".page-content");
+    let home = $$(page[2]);
+    let popup = $$(page[3]);
+
+    page.on("scroll", () => {
+      if (home.scrollTop() > 1000) {
+        this.homeScrolled = true;
+      } else {
+        this.homeScrolled = false;
+      }
+      if (popup.scrollTop() > 1000) {
+        this.popupScrolled = true;
+      } else {
+        this.popupScrolled = false;
+      }
+    });
 
     if (window.innerWidth > 600) {
       this.col = 4;
@@ -136,10 +164,12 @@ export default {
       this.favorite = favorite;
 
       this.getTagImages(this.tags);
-     
-    
+      this.scrollToTop();
     },
-    scrollToTop() {},
+    scrollToTop() {
+      let page = $$(".page-content");
+      page.scrollTop(0);
+    },
     addToFavorites() {},
 
     loadMoreTags() {
@@ -190,7 +220,7 @@ export default {
       );
     },
     pageOne(tag) {
-      window.scrollTo(0, 500);
+     
       this.tagType = "tag";
       this.$store.state.page = 1;
       let page = this.$store.state.page;
@@ -245,8 +275,18 @@ export default {
       );
     }
   },
-  watch: {},
-  computed: {}
+  watch: {
+   imageType(newVal, oldVal) {
+     if(newVal) {
+       this.images = []
+       this.loadImages(1);
+       
+     }
+   }
+  },
+  computed: {
+  ...mapGetters(["imageType"])
+  }
 };
 </script>
 
@@ -263,12 +303,20 @@ img {
   border-radius: 5px;
   transition: 1s ease;
 }
+/* .fab {
+  color: #08da08;
+} */
 .pop {
-  color: rgb(8, 218, 8);
+  color: #08da08;
   background: rgb(32, 32, 32);
   letter-spacing: 1px;
   font-weight: 500;
   font-family: Arial, Helvetica, sans-serif;
+}
+.pull {
+  text-align: center;
+  margin:2px 0 0 0;
+  padding:0;
 }
 
 img[lazy="loading"] {
@@ -337,4 +385,6 @@ img[lazy="loaded"] {
 .tag:focus {
   outline: none;
 }
+
+
 </style>
