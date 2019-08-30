@@ -1,8 +1,6 @@
 <template >
   <f7-page name="home" class="images text-color-white">
-    
     <div class="wrap">
-       
       <masonry :cols="col" :gutter="10">
         <div v-for="(img, index) in images" :key="index">
           <img
@@ -13,11 +11,17 @@
         </div>
       </masonry>
     </div>
-   
-      <f7-fab v-if="homeScrolled" position="right-bottom" @click="scrollToTop" slot="fixed" color="green">
-        <f7-icon material="keyboard_arrow_up"></f7-icon>
-      </f7-fab>
-    
+
+    <f7-fab
+      v-if="homeScrolled"
+      position="right-bottom"
+      @click="scrollToTop"
+      slot="fixed"
+      color="green"
+    >
+      <f7-icon material="keyboard_arrow_up"></f7-icon>
+    </f7-fab>
+
     <f7-button
       v-if="images.length > 0"
       flat
@@ -32,9 +36,9 @@
       @popup:closed="open = false"
     >
       <f7-view>
-       
         <f7-page class="pop">
-          <p class="pull text-color-white">&darr; pull to close &darr;</p>
+          
+         <f7-icon class="arrowDown" material="arrow_drop_down"></f7-icon>
           <f7-block>
             <div class="title-wrap" id="top">
               <div @click="addToFavorites" class="icon-wrap">
@@ -67,11 +71,17 @@
               </div>
             </div>
           </f7-block>
-         
-            <f7-fab v-if="popupScrolled" position="right-bottom" slot="fixed" @click="scrollToTop" color="green">
-              <f7-icon material="keyboard_arrow_up"></f7-icon>
-            </f7-fab>
-          
+
+          <f7-fab
+            v-if="popupScrolled"
+            position="right-bottom"
+            slot="fixed"
+            @click="scrollToTop"
+            color="green"
+          >
+            <f7-icon material="keyboard_arrow_up"></f7-icon>
+          </f7-fab>
+
           <f7-block>
             <div class="images text-color-white">
               <div class="tag-image-wrap">
@@ -96,7 +106,6 @@
         </f7-page>
       </f7-view>
     </f7-popup>
-   
   </f7-page>
 </template>
 
@@ -107,6 +116,7 @@ import { mapGetters } from "vuex";
 import $$ from "Dom7";
 export default {
   components: {},
+  props: ["searchInput"],
   data() {
     return {
       images: [],
@@ -119,22 +129,29 @@ export default {
       tags: [],
       favorite: "",
       tag: "",
-      array: "pageLoad",
+      arrayType: "memes",
       tagImages: [],
       tagType: "",
       homeScrolled: false,
       popupScrolled: false,
-     
+      searchImages: [],
+      search: "",
+      pageOn: 'home'
     };
   },
   created() {},
   mounted() {
-    
-    
     this.loadImages(1);
     let page = $$(".page-content");
     let home = $$(page[2]);
     let popup = $$(page[3]);
+
+    home.on('mouseover', () => {
+      this.pageOn = 'home'
+    })
+    popup.on('mouseover', () => {
+      this.pageOn = 'popup'
+    })
 
     page.on("scroll", () => {
       if (home.scrollTop() > 1000) {
@@ -162,9 +179,11 @@ export default {
       this.image = image;
       this.tags = tags;
       this.favorite = favorite;
-
       this.getTagImages(this.tags);
-      this.scrollToTop();
+      if(this.pageOn == 'popup') {
+        this.scrollToTop()
+      }
+      
     },
     scrollToTop() {
       let page = $$(".page-content");
@@ -181,8 +200,13 @@ export default {
       }
     },
     loadMoreImages() {
-      this.loadImages(this.i);
-      this.i++;
+      if (this.arrayType == "memes" || this.arrayType == "tags") {
+        this.loadImages(this.i);
+        this.i++;
+      } else {
+        this.$store.dispatch("incrementPage");
+        this.searchImageMethod(this.search);
+      }
     },
     closePopUp() {
       this.open = false;
@@ -211,6 +235,7 @@ export default {
     loadImages(page) {
       this.$store.dispatch("loadInfo", page).then(
         response => {
+          this.arrayType = response[0].array;
           response = response.sort(() => Math.random() - 0.5);
           response.forEach(x => this.images.push(x));
         },
@@ -220,7 +245,6 @@ export default {
       );
     },
     pageOne(tag) {
-     
       this.tagType = "tag";
       this.$store.state.page = 1;
       let page = this.$store.state.page;
@@ -241,10 +265,38 @@ export default {
     },
 
     getTagImages(tags) {
+      this.tagImages = [];
       this.tagType = "tags";
       let page = this.$store.state.page;
       this.$store.dispatch("tagImages", tags).then(
         response => {
+          if (response.length > 0) {
+            
+            this.arrayType = response[0].array;
+            response = response.sort(() => Math.random() - 0.5);
+            if (page > 1) {
+              response.forEach(x => this.tagImages.push(x));
+            } else {
+              this.tagImages = response;
+            }
+          } else { // carry on from here ===============================================================
+            console.log('no tags')
+            console.log(this.searchImages);
+            this.tagImages = this.searchImages.sort(() => Math.random() - 0.5);
+          }
+          //=========================================================================
+        },
+        error => {
+          console.error("Got nothing from server");
+        }
+      );
+    },
+    getSingleTag(tag) {
+      this.tagType = "tag";
+      let page = this.$store.state.page;
+      this.$store.dispatch("singleTag", tag).then(
+        response => {
+          this.arrayType = response[0].array;
           response = response.sort(() => Math.random() - 0.5);
           if (page > 1) {
             response.forEach(x => this.tagImages.push(x));
@@ -257,17 +309,19 @@ export default {
         }
       );
     },
-    getSingleTag(tag) {
-      this.tagType = "tag";
+    searchImageMethod(query) {
+      
       let page = this.$store.state.page;
-      this.$store.dispatch("singleTag", tag).then(
+      this.search = query;
+      this.$store.dispatch("imageSearch", query).then(
         response => {
-          response = response.sort(() => Math.random() - 0.5);
+          this.arrayType = response[0].array;
           if (page > 1) {
-            response.forEach(x => this.tagImages.push(x));
+            response.forEach(x => this.images.push(x));
           } else {
-            this.tagImages = response;
+            this.images = response;
           }
+          this.scrollToTop()
         },
         error => {
           console.error("Got nothing from server");
@@ -276,16 +330,22 @@ export default {
     }
   },
   watch: {
-   imageType(newVal, oldVal) {
-     if(newVal) {
-       this.images = []
-       this.loadImages(1);
-       
-     }
-   }
+    imageType(newVal, oldVal) {
+      if (newVal) {
+        this.$store.state.page = 1;
+        this.images = [];
+        this.loadImages(1);
+      }
+    },
+    searchInput(newVal, oldVal) {
+      if (newVal) {
+        this.$store.state.page = 1;
+        this.searchImageMethod(newVal);
+      }
+    }
   },
   computed: {
-  ...mapGetters(["imageType"])
+    ...mapGetters(["imageType"])
   }
 };
 </script>
@@ -313,10 +373,16 @@ img {
   font-weight: 500;
   font-family: Arial, Helvetica, sans-serif;
 }
+.arrowDown {
+  margin:0 auto;
+  display:block;
+  width:40px;
+  font-size:40px;
+}
 .pull {
   text-align: center;
-  margin:2px 0 0 0;
-  padding:0;
+  margin: 2px 0 0 0;
+  padding: 0;
 }
 
 img[lazy="loading"] {
@@ -385,6 +451,4 @@ img[lazy="loaded"] {
 .tag:focus {
   outline: none;
 }
-
-
 </style>

@@ -1,7 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
-import { async } from "q";
 
 Vue.use(Vuex, axios);
 
@@ -10,46 +9,53 @@ export default new Vuex.Store({
     images: [],
     tags: [],
     page: 1,
-    imageType: 'images'
-    
+    imageType: "images"
   },
   mutations: {
     incrementPage(state) {
-      state.page++
+      state.page++;
     },
     imageType(state, type) {
-      state.imageType = type
-      //console.log(state.imageType)
+      state.imageType = type;
+      
     }
   },
   getters: {
-    imageType: state => state.imageType,
+    imageType: state => state.imageType
   },
   actions: {
     incrementPage(context) {
-      context.commit('incrementPage')
-      
+      context.commit("incrementPage");
     },
     imageType({ commit }, type) {
-      commit('imageType', type)
+      commit("imageType", type);
     },
-    loadInfo(context, page) {
-      
-      
+    loadInfo(page) {
       return new Promise((resolve, reject) => {
         let memeArray = [];
         let done = 0;
-        let memes
-        if(this.state.imageType == 'images') {
-          memes = ['memes', 'funny', 'like_a_boss', 'dank_memes', 'nailed_it', 'florida_man']
-        }else{
-          memes = ['memes', 'funny', 'like_a_boss', 'dank_memes', 'nailed_it', 'florida_man', 'gifs']
+        let memes;
+        if (this.state.imageType == "images") {
+          memes = [
+            "memes",
+            "funny",
+            "like_a_boss",
+            "dank_memes",
+            "nailed_it",
+            "florida_man"
+          ];
+        } else {
+          memes = [
+            "memes",
+            "funny",
+            "like_a_boss",
+            "dank_memes",
+            "nailed_it",
+            "florida_man",
+            "gifs"
+          ];
         }
-        
 
-        
-        
-        
         let len = memes.length;
         for (let i = 0; i < len; i++) {
           axios({
@@ -62,7 +68,7 @@ export default new Vuex.Store({
             .then(response => {
               let images = response.data.data.items;
               let all = [];
-              
+
               images.forEach(x => {
                 let url = "";
 
@@ -74,7 +80,7 @@ export default new Vuex.Store({
                 } else {
                   url = x.images[0].link;
                 }
-             
+
                 let tags = x.tags.map(x => x.name);
 
                 let loader = require("../loading.svg");
@@ -95,17 +101,17 @@ export default new Vuex.Store({
               });
 
               let tagsAdded = 0;
-              let noMP4 
-              
-              if(this.state.imageType == 'images') {
+              let noMP4;
+
+              if (this.state.imageType == "images") {
                 noMP4 = all
-               .filter(x => !x.link.src.match(/mp4$|gif$/))
-               .filter(x => x.height < 1000);
-             }else{
-               noMP4 = all
-               .filter(x => x.link.src.match(/gif$/))
-               .filter(x => x.height < 1000);
-             }
+                  .filter(x => !x.link.src.match(/mp4$|gif$/))
+                  .filter(x => x.height < 1000);
+              } else {
+                noMP4 = all
+                  .filter(x => x.link.src.match(/gif$/))
+                  .filter(x => x.height < 1000);
+              }
 
               noMP4.forEach(x => {
                 memeArray.push(x);
@@ -116,8 +122,6 @@ export default new Vuex.Store({
               if (tagsAdded == noMP4.length) {
                 done++;
               }
-
-            
             })
             .catch(function(error) {
               reject(error);
@@ -135,8 +139,8 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         let tagArray = [];
         let len = tagArr.length;
-        let page = context.state.page
-        
+        let page = context.state.page;
+
         let done = 0;
         for (let i = 0; i < tagArr.length; i++) {
           axios({
@@ -149,7 +153,7 @@ export default new Vuex.Store({
             .then(response => {
               let images = response.data.data.items;
               let all = [];
-              
+
               images.forEach(x => {
                 let url = "";
 
@@ -157,13 +161,11 @@ export default new Vuex.Store({
 
                 let linkCheck = reg.test(x.link);
                 if (linkCheck) {
-                  
                   url = x.link;
                 } else {
-                  
                   url = x.images[0].link;
                 }
-             
+
                 let tags = x.tags.map(x => x.name);
 
                 let loader = require("../loading.svg");
@@ -184,22 +186,19 @@ export default new Vuex.Store({
               });
 
               let tagsAdded = 0;
-              let noMP4 
-              
-              if(this.state.imageType == 'images') {
-                noMP4 = all
-               .filter(x => !x.link.src.match(/mp4$|gif$/))
-               .filter(x => x.height < 1000);
-             }else{
-               noMP4 = all
-               .filter(x => x.link.src.match(/gif$/))
-               .filter(x => x.height < 1000);
-             }
-             
+              let noMP4;
 
-              
-                
-              noMP4.forEach((x, i) => {
+              if (this.state.imageType == "images") {
+                noMP4 = all
+                  .filter(x => !x.link.src.match(/mp4$|gif$/))
+                  .filter(x => x.height < 1000);
+              } else {
+                noMP4 = all
+                  .filter(x => x.link.src.match(/gif$/))
+                  .filter(x => x.height < 1000);
+              }
+
+              noMP4.forEach(x => {
                 tagArray.push(x);
 
                 tagsAdded++;
@@ -208,8 +207,6 @@ export default new Vuex.Store({
               if (tagsAdded == noMP4.length) {
                 done++;
               }
-
-            
             })
             .catch(function(error) {
               reject(error);
@@ -225,134 +222,145 @@ export default new Vuex.Store({
 
     singleTag(context, tag) {
       return new Promise((resolve, reject) => {
-        let page = context.state.page
+        let page = context.state.page;
         let tagArray = [];
         let len = 1;
         let done = 0;
-        console.log(page)
-          axios({
-            method: "get",
-            url: `https://api.imgur.com/3/gallery/t/${tag}//time/all/${page}`,
-            headers: {
-              Authorization: "Client-ID 7711bc539737c6e"
+
+        axios({
+          method: "get",
+          url: `https://api.imgur.com/3/gallery/t/${tag}//time/all/${page}`,
+          headers: {
+            Authorization: "Client-ID 7711bc539737c6e"
+          }
+        })
+          .then(response => {
+            let images = response.data.data.items;
+            let all = [];
+
+            images.forEach(x => {
+              let url = "";
+
+              let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
+
+              let linkCheck = reg.test(x.link);
+              if (linkCheck) {
+                url = x.link;
+              } else {
+                url = x.images[0].link;
+              }
+
+              let tags = x.tags.map(x => x.name);
+
+              let loader = require("../loading.svg");
+
+              all.push({
+                array: "tags",
+                id: x.id,
+                desc: x.title,
+                image: url,
+                link: {
+                  src: url,
+                  loading: loader
+                },
+                tags: tags,
+                height: x.cover_height,
+                favorite: false,
+                page: page
+              });
+            });
+
+            let tagsAdded = 0;
+            let noMP4 = all
+              .filter(x => !x.link.src.match(/mp4$|gif$/))
+              .filter(x => x.height < 1000);
+
+            noMP4.forEach(x => {
+              tagArray.push(x);
+
+              tagsAdded++;
+            });
+
+            if (tagsAdded == noMP4.length) {
+              done++;
             }
           })
-            .then(response => {
-              let images = response.data.data.items;
-              let all = [];
+          .catch(function(error) {
+            reject(error);
+          })
+          .finally(() => {
+            if (done == len) {
+              resolve(tagArray);
+            }
+          });
+      });
+    },
+
+    imageSearch(context, name) {
+      return new Promise((resolve, reject) => {
+        let page = context.state.page;
+        let all = [];
+        
+        axios({
+          method: "get",
+          url: `https://api.imgur.com/3/gallery/search/top/${page}?q=` + name,
+          headers: {
+            Authorization: "Client-ID 7711bc539737c6e"
+          }
+        })
+          .then(response => {
+            let images = response.data.data;
+
+            images.forEach(x => {
+              let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
+              let arr = "";
+              let linkCheck = reg.test(x.link);
+              if (linkCheck) {
+                arr = x.link;
+              } else {
+                arr = x.images[0].link;
+              }
+              let height = x.cover_height;
+              if (x.cover_height == undefined) {
+                height = x.height;
+              }
+              let tags = x.tags.map(x => x.name);
               
-              images.forEach(x => {
-                let url = "";
+              let loader = require("../loading.svg");
 
-                let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
-
-                let linkCheck = reg.test(x.link);
-                if (linkCheck) {
-                  
-                  url = x.link;
-                } else {
-                  
-                  url = x.images[0].link;
-                }
-             
-                let tags = x.tags.map(x => x.name);
-
-                let loader = require("../loading.svg");
-
-                all.push({
-                  array: "tags",
-                  id: x.id,
-                  desc: x.title,
-                  image: url,
-                  link: {
-                    src: url,
-                    loading: loader
-                  },
-                  tags: tags,
-                  height: x.cover_height,
-                  favorite: false,
-                  page: page,
-                });
+              all.push({
+                array: "search",
+                id: x.id,
+                desc: x.title,
+                image: arr,
+                link: {
+                  src: arr,
+                  loading: loader
+                },
+                tags: tags,
+                height: height,
+                favorite: false,
+                page: page
               });
+            });
 
-              let tagsAdded = 0;
-              let noMP4 = all
+            let noMP4
+            if (this.state.imageType == "images") {
+              noMP4 = all
                 .filter(x => !x.link.src.match(/mp4$|gif$/))
                 .filter(x => x.height < 1000);
+            } else {
+              noMP4 = all
+                .filter(x => x.link.src.match(/gif$/))
+                .filter(x => x.height < 1000);
+            }
+            resolve(noMP4)
 
-              
-                
-              noMP4.forEach((x, i) => {
-                tagArray.push(x);
-
-                tagsAdded++;
-              });
-
-              if (tagsAdded == noMP4.length) {
-                done++;
-              }
-
-            
-            })
-            .catch(function(error) {
-              reject(error);
-            })
-            .finally(() => {
-              if (done == len) {
-                
-                resolve(tagArray);
-              }
-            });
-        
+          })
+          .catch(function(error) {
+            reject(error);
+          });
       });
     }
-
-    // imageSearch({ commit }, name) {
-    //   for (let i = 1; i <= 3; i++) {
-    //     axios({
-    //       method: "get",
-    //       url:
-    //         `https://api.imgur.com/3/gallery/search/top/${i}?q=` +
-    //         this.input,
-    //       headers: {
-    //         Authorization: "Client-ID 7711bc539737c6e"
-    //       }
-    //     })
-    //       .then(response => {
-    //         let images = response.data.data;
-
-    //         images.forEach(x => {
-    //           let url = "";
-
-    //           let reg = new RegExp(/.png$|.jpg$|.gif$/);
-
-    //           let linkCheck = reg.test(x.link);
-    //           if (linkCheck) {
-    //             url = x.link;
-    //           } else {
-    //             url = x.images[0].link;
-    //           }
-
-    //           let tags = x.tags.map(x => x.name);
-
-    //           this.all.push({
-    //             id: x.id,
-    //             desc: x.title,
-    //             title: this.tempTitle[0],
-    //             link: url,
-    //             tags: tags,
-    //             loaded: false
-    //           });
-    //         });
-    //       })
-    //       .then(() => {
-    //         this.splitArrays(this.n++);
-    //       })
-    //       .catch(function(error) {
-    //         console.log(error);
-    //       });
-    //     }
-
-    // }
   }
 });

@@ -18,6 +18,7 @@
 
     <!-- Page content-->
     <f7-searchbar
+      id="searchBar"
       :custom-search="true"
       @change="input = $event.target.value"
       @submit="getInfo"
@@ -25,7 +26,7 @@
       placeholder="Search Images"
       :clear-button="true"
     ></f7-searchbar>
-    <images />
+    <images :searchInput="searchQuery" />
   </f7-page>
 </template>
 
@@ -34,7 +35,7 @@
 import images from "../components/Images";
 import cordovaApp from "../js/cordova-app.js";
 import routes from "../js/routes.js";
-
+import $$ from 'Dom7'
 export default {
   components: {
     images
@@ -42,12 +43,16 @@ export default {
   data() {
     return {
       title: "memester",
-      input: ""
+      input: "",
+      searchQuery: ""
     };
   },
   methods: {
     getInfo() {
-      console.log(this.input);
+    this.searchQuery = this.input;
+     let searchBar = $$('#searchBar')[0].f7Searchbar
+     searchBar.clear()
+     searchBar.disable()
     }
   }
 };
