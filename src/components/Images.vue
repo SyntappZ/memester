@@ -399,7 +399,6 @@ export default {
       }
     },
     getFavorites(newVal, oldVal) {
-      console.log(newVal)
       if (newVal) {
         this.loadFavorites();
         this.onFavoritesPage = true;
@@ -407,9 +406,7 @@ export default {
       } 
     },
     backToHome(newVal, oldVal) {
-      console.log(newVal)
       if(newVal) {
-        
         this.images = [];
         this.$store.state.homePage = 1;
         this.loadImages();
