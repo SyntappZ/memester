@@ -5,7 +5,7 @@
         <div v-for="(img, index) in images" :key="index">
           <img
             v-lazy="img.link"
-            @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite)"
+            @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite, img.link)"
             popup-open=".my-popup"
           />
         </div>
@@ -17,12 +17,13 @@
       position="right-bottom"
       @click="scrollToTop"
       slot="fixed"
-      color="green"
+      color="red"
     >
       <f7-icon material="keyboard_arrow_up"></f7-icon>
     </f7-fab>
 
     <f7-button
+      v-show="!onFavoritesPage"
       v-if="images.length > 0"
       flat
       class="btn text-color-white"
@@ -37,12 +38,11 @@
     >
       <f7-view>
         <f7-page class="pop">
-          
-         <f7-icon class="arrowDown" material="arrow_drop_down"></f7-icon>
+          <f7-icon class="arrowDown" material="arrow_drop_down"></f7-icon>
           <f7-block>
             <div class="title-wrap" id="top">
               <div @click="addToFavorites" class="icon-wrap">
-                <f7-icon v-if="favorite == true" material="favorite"></f7-icon>
+                <f7-icon v-if="isFavorite" material="favorite"></f7-icon>
                 <f7-icon v-else material="favorite_border"></f7-icon>
               </div>
               <h1 class="meme-title">memester</h1>
@@ -77,7 +77,7 @@
             position="right-bottom"
             slot="fixed"
             @click="scrollToTop"
-            color="green"
+            color="red"
           >
             <f7-icon material="keyboard_arrow_up"></f7-icon>
           </f7-fab>
@@ -89,7 +89,7 @@
                   <div v-for="(img, index) in tagImages" :key="index">
                     <img
                       v-lazy="img.link"
-                      @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite)"
+                      @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite, img.link)"
                     />
                   </div>
                 </masonry>
@@ -129,6 +129,7 @@ export default {
       tags: [],
       favorite: "",
       tag: "",
+      link: {},
       arrayType: "memes",
       tagImages: [],
       tagType: "",
@@ -136,22 +137,29 @@ export default {
       popupScrolled: false,
       searchImages: [],
       search: "",
-      pageOn: 'home'
+      pageOn: "home",
+      favoritesArray: [],
+      imageData: {},
+      onFavoritesPage: false
     };
   },
-  created() {},
+
   mounted() {
-    this.loadImages(1);
+    this.favoritesArray = localStorage.getItem("favorites")
+      ? JSON.parse(localStorage.getItem("favorites"))
+      : [];
+
+    this.loadImages();
     let page = $$(".page-content");
     let home = $$(page[2]);
     let popup = $$(page[3]);
 
-    home.on('mouseover', () => {
-      this.pageOn = 'home'
-    })
-    popup.on('mouseover', () => {
-      this.pageOn = 'popup'
-    })
+    home.on("mouseover", () => {
+      this.pageOn = "home";
+    });
+    popup.on("mouseover", () => {
+      this.pageOn = "popup";
+    });
 
     page.on("scroll", () => {
       if (home.scrollTop() > 1000) {
@@ -170,48 +178,25 @@ export default {
       this.col = 4;
     }
   },
-  created() {},
+
   methods: {
-    getImageData(id, image, desc, tags, favorite) {
-      this.$store.state.page = 1;
-      this.open = true;
-      this.description = desc;
-      this.image = image;
-      this.tags = tags;
-      this.favorite = favorite;
-      this.getTagImages(this.tags);
-      if(this.pageOn == 'popup') {
-        this.scrollToTop()
-      }
-      
-    },
-    scrollToTop() {
+      scrollToTop() {
       let page = $$(".page-content");
       page.scrollTop(0);
     },
-    addToFavorites() {},
 
-    loadMoreTags() {
-      this.$store.dispatch("incrementPage");
-      if (this.tagType == "tags") {
-        this.getTagImages(this.tags);
-      } else {
-        this.getSingleTag(this.tag);
-      }
+   
+    loadFavorites() {
+      this.images = this.favoritesArray;
     },
-    loadMoreImages() {
-      if (this.arrayType == "memes" || this.arrayType == "tags") {
-        this.loadImages(this.i);
-        this.i++;
-      } else {
-        this.$store.dispatch("incrementPage");
-        this.searchImageMethod(this.search);
-      }
-    },
+
+   
+   
     closePopUp() {
       this.open = false;
     },
-    shareImage() {
+   
+     shareImage() {
       var options = {
         files: [this.image]
       };
@@ -232,11 +217,36 @@ export default {
       );
     },
 
-    loadImages(page) {
-      this.$store.dispatch("loadInfo", page).then(
+     addToFavorites() {
+      if (this.favorite) {
+        let favoriteIDs = this.favoritesArray.map(x => x.id);
+        let index = favoriteIDs.indexOf(this.id);
+        this.favoritesArray.splice(index, 1);
+        localStorage.setItem("favorites", JSON.stringify(this.favoritesArray));
+
+        this.favorite = false;
+      } else {
+        this.favorite = true;
+        this.imageData = {
+          array: "favorites",
+          id: this.id,
+          desc: this.description,
+          image: this.image,
+          link: this.link,
+          tags: this.tags,
+          favorite: true
+        };
+        this.favoritesArray.push(this.imageData);
+        localStorage.setItem("favorites", JSON.stringify(this.favoritesArray));
+      }
+    },
+    loadImages() {
+     
+      this.$store.dispatch("loadInfo").then(
         response => {
+         
           this.arrayType = response[0].array;
-          response = response.sort(() => Math.random() - 0.5);
+           response = response.sort(() => Math.random() - 0.5);
           response.forEach(x => this.images.push(x));
         },
         error => {
@@ -244,9 +254,96 @@ export default {
         }
       );
     },
-    pageOne(tag) {
-      this.tagType = "tag";
+     loadMoreImages() {
+      this.$store.dispatch("incrementPage", 'home');
+      if (this.arrayType == "memes" || this.arrayType == "tags") {
+        this.loadImages();
+        console.log('memes')
+      } else {
+        
+        this.searchImageMethod(this.search);
+      }
+    },
+    getImageData(id, image, desc, tags, favorite, link) {
+      let favoriteIDs = this.favoritesArray.map(x => x.id);
+
+      favoriteIDs.forEach(x => {
+        if (x == id) {
+          favorite = true;
+        }
+      });
+
       this.$store.state.page = 1;
+      this.open = true;
+      this.id = id;
+      this.description = desc;
+      this.image = image;
+      this.tags = tags;
+      this.favorite = favorite;
+      this.link = link;
+      this.getTagImages(this.tags);
+      if (this.pageOn == "popup") {
+        this.scrollToTop();
+      }
+    },
+
+      getTagImages(tags) {
+      this.tagImages = [];
+      this.tagType = "tags";
+
+      let page = this.$store.state.page;
+      if (tags.length == 0) {
+        tags = [this.searchInput];
+      }
+      this.$store.dispatch("tagImages", tags).then(
+        response => {
+          if (tags.length > 0) {
+            this.arrayType = response[0].array;
+            response = response.sort(() => Math.random() - 0.5);
+            if (page > 1) {
+              console.log('pushing')
+              response.forEach(x => this.tagImages.push(x));
+            } else {
+              this.tagImages = response;
+            }
+          }
+        },
+        error => {
+          console.error("Got nothing from server");
+        }
+      );
+    },
+    getSingleTag(tag) {
+      this.tagType = "tag";
+      let page = this.$store.state.page;
+      this.$store.dispatch("singleTag", tag).then(
+        response => {
+          this.arrayType = response[0].array;
+          response = response.sort(() => Math.random() - 0.5);
+          if (page > 1) {
+            console.log('pushing')
+            response.forEach(x => this.tagImages.push(x));
+          } else {
+            this.tagImages = response;
+          }
+        },
+        error => {
+          console.error("Got nothing from server");
+        }
+      );
+    },
+     loadMoreTags() {
+      this.$store.dispatch("incrementPage", 'popup');
+      if (this.tagType == "tags") {
+        this.getTagImages(this.tags);
+      } else {
+        this.getSingleTag(this.tag);
+      }
+    },
+
+     pageOne(tag) {
+      this.tagType = "tag";
+      
       let page = this.$store.state.page;
       this.tag = tag;
       this.$store.dispatch("singleTag", tag).then(
@@ -264,53 +361,7 @@ export default {
       );
     },
 
-    getTagImages(tags) {
-      this.tagImages = [];
-      this.tagType = "tags";
-      let page = this.$store.state.page;
-      this.$store.dispatch("tagImages", tags).then(
-        response => {
-          if (response.length > 0) {
-            
-            this.arrayType = response[0].array;
-            response = response.sort(() => Math.random() - 0.5);
-            if (page > 1) {
-              response.forEach(x => this.tagImages.push(x));
-            } else {
-              this.tagImages = response;
-            }
-          } else { // carry on from here ===============================================================
-            console.log('no tags')
-            console.log(this.searchImages);
-            this.tagImages = this.searchImages.sort(() => Math.random() - 0.5);
-          }
-          //=========================================================================
-        },
-        error => {
-          console.error("Got nothing from server");
-        }
-      );
-    },
-    getSingleTag(tag) {
-      this.tagType = "tag";
-      let page = this.$store.state.page;
-      this.$store.dispatch("singleTag", tag).then(
-        response => {
-          this.arrayType = response[0].array;
-          response = response.sort(() => Math.random() - 0.5);
-          if (page > 1) {
-            response.forEach(x => this.tagImages.push(x));
-          } else {
-            this.tagImages = response;
-          }
-        },
-        error => {
-          console.error("Got nothing from server");
-        }
-      );
-    },
-    searchImageMethod(query) {
-      
+     searchImageMethod(query) {
       let page = this.$store.state.page;
       this.search = query;
       this.$store.dispatch("imageSearch", query).then(
@@ -321,7 +372,7 @@ export default {
           } else {
             this.images = response;
           }
-          this.scrollToTop()
+          this.scrollToTop();
         },
         error => {
           console.error("Got nothing from server");
@@ -329,6 +380,13 @@ export default {
       );
     }
   },
+
+  
+    
+   
+
+  
+   
   watch: {
     imageType(newVal, oldVal) {
       if (newVal) {
@@ -342,10 +400,27 @@ export default {
         this.$store.state.page = 1;
         this.searchImageMethod(newVal);
       }
+    },
+    changeHomePage(newVal, oldVal) {
+      
+      if (newVal == "favorites") {
+       
+        this.loadFavorites();
+        this.onFavoritesPage = true
+      } else {
+       
+        this.images = [];
+        this.loadImages(1);
+        this.onFavoritesPage = false
+      }
     }
   },
   computed: {
-    ...mapGetters(["imageType"])
+    ...mapGetters(["imageType", "changeHomePage"]),
+
+    isFavorite() {
+      return this.favorite;
+    }
   }
 };
 </script>
@@ -374,10 +449,10 @@ img {
   font-family: Arial, Helvetica, sans-serif;
 }
 .arrowDown {
-  margin:0 auto;
-  display:block;
-  width:40px;
-  font-size:40px;
+  margin: 0 auto;
+  display: block;
+  width: 40px;
+  font-size: 40px;
 }
 .pull {
   text-align: center;

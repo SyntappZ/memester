@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
 
+
 Vue.use(Vuex, axios);
 
 export default new Vuex.Store({
@@ -9,32 +10,49 @@ export default new Vuex.Store({
     images: [],
     tags: [],
     page: 1,
-    imageType: "images"
+    homePage: 1,
+    imageType: "images",
+    changeHomePage: 'home'
+
   },
   mutations: {
-    incrementPage(state) {
-      state.page++;
+    incrementPage(state, page) {
+      page == 'home' ? state.homePage++ : state.page++
     },
+   
     imageType(state, type) {
       state.imageType = type;
       
+    },
+    changeHomePage(state, page) {
+      state.changeHomePage = page
+      
     }
+    
   },
   getters: {
-    imageType: state => state.imageType
+    imageType: state => state.imageType,
+    changeHomePage: state => state.changeHomePage
   },
   actions: {
-    incrementPage(context) {
-      context.commit("incrementPage");
+    incrementPage(context, page) {
+      context.commit("incrementPage", page);
     },
     imageType({ commit }, type) {
       commit("imageType", type);
     },
-    loadInfo(page) {
+    changeHomePage({ commit }, page) {
+      commit('changeHomePage', page)
+    },
+    
+    loadInfo(context) {
+     
       return new Promise((resolve, reject) => {
         let memeArray = [];
-        let done = 0;
+        let done = 1;
         let memes;
+        let page = context.state.homePage;
+        
         if (this.state.imageType == "images") {
           memes = [
             "memes",
@@ -55,12 +73,12 @@ export default new Vuex.Store({
             "gifs"
           ];
         }
-
+        
         let len = memes.length;
-        for (let i = 0; i < len; i++) {
+         for (let i = 0; i < len; i++) {
           axios({
             method: "get",
-            url: `https://api.imgur.com/3/gallery/t/${memes[i]}/top/all/${page}`,
+            url: `https://api.imgur.com/3/gallery/t/${memes[i]}/top/all/${3}`,
             headers: {
               Authorization: "Client-ID 7711bc539737c6e"
             }
@@ -68,7 +86,7 @@ export default new Vuex.Store({
             .then(response => {
               let images = response.data.data.items;
               let all = [];
-
+              console.log(response)
               images.forEach(x => {
                 let url = "";
 
@@ -80,7 +98,7 @@ export default new Vuex.Store({
                 } else {
                   url = x.images[0].link;
                 }
-
+                
                 let tags = x.tags.map(x => x.name);
 
                 let loader = require("../loading.svg");
@@ -99,8 +117,8 @@ export default new Vuex.Store({
                   favorite: false
                 });
               });
-
-              let tagsAdded = 0;
+              
+              
               let noMP4;
 
               if (this.state.imageType == "images") {
@@ -113,25 +131,29 @@ export default new Vuex.Store({
                   .filter(x => x.height < 1000);
               }
 
-              noMP4.forEach(x => {
+               noMP4.forEach((x, i, a) => {
                 memeArray.push(x);
-
-                tagsAdded++;
+              
               });
-
-              if (tagsAdded == noMP4.length) {
-                done++;
-              }
+              
+              
+             
+             console.log(done)
+             if(done == len) {
+               console.log('done')
+               
+              // resolve(memeArray)
+               
+             }
+             done++
             })
             .catch(function(error) {
               reject(error);
             })
-            .finally(() => {
-              if (done == len) {
-                resolve(memeArray);
-              }
-            });
+            
+            
         }
+      
       });
     },
 
@@ -140,7 +162,7 @@ export default new Vuex.Store({
         let tagArray = [];
         let len = tagArr.length;
         let page = context.state.page;
-
+          console.log(page)
         let done = 0;
         for (let i = 0; i < tagArr.length; i++) {
           axios({
@@ -184,7 +206,7 @@ export default new Vuex.Store({
                   favorite: false
                 });
               });
-
+             
               let tagsAdded = 0;
               let noMP4;
 
@@ -214,6 +236,7 @@ export default new Vuex.Store({
             .finally(() => {
               if (done == len) {
                 resolve(tagArray);
+                
               }
             });
         }

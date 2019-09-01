@@ -31,7 +31,7 @@
 </template>
 
 <script>
-// popup-open="#my-popup"
+
 import images from "../components/Images";
 import cordovaApp from "../js/cordova-app.js";
 import routes from "../js/routes.js";

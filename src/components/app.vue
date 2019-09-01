@@ -15,16 +15,17 @@
             <f7-block-title class="text-color-green">Options</f7-block-title>
             <f7-list>
              
-              <f7-list-item class="panel-close" title="Images" @click="showImages"></f7-list-item>
-              <f7-list-item class="panel-close" title="Gifs" @click="showGifs"></f7-list-item>
+              <f7-list-item class="panel-close" title="Images" @click="showImages" link="#"></f7-list-item>
+              <f7-list-item class="panel-close" title="Gifs" @click="showGifs" link="#"></f7-list-item>
             </f7-list>
         
             
             <f7-block-title class="text-color-green">Other</f7-block-title>
             <f7-list>
-               <f7-list-item title="Favorites" link="#"></f7-list-item>
-              <f7-list-item title="Information" link="#"></f7-list-item>
-              <f7-list-item title="Contact" link="#"></f7-list-item>
+               <f7-list-item class="panel-close" title="Home" @click="changePage('home')" link="#"></f7-list-item>
+               <f7-list-item  class="panel-close" title="Favorites" @click="changePage('favorites')" link="#"></f7-list-item>
+              <f7-list-item  class="panel-close" title="Information" link="#"></f7-list-item>
+              <f7-list-item  class="panel-close" title="Contact" link="#"></f7-list-item>
             
             </f7-list>
           
@@ -89,6 +90,9 @@ export default {
     showImages() {
       this.$store.dispatch("imageType", 'images')
     
+    },
+    changePage(page) {
+      this.$store.dispatch('changeHomePage', page)
     }
     
     
