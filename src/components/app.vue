@@ -93,6 +93,12 @@ export default {
     },
     changePage(page) {
       this.$store.dispatch('changeHomePage', page)
+    },
+    getFavorites() {
+
+    },
+    getHome() {
+
     }
     
     

@@ -1,5 +1,12 @@
 <template >
-  <f7-page name="home" class="images text-color-white">
+  <f7-page
+    infinite
+    :infinite-distance="1"
+    @infinite="loadMoreImages"
+    :infinite-preloader="!onFavoritesPage"
+    name="home"
+    class="images text-color-white"
+  >
     <div class="wrap">
       <masonry :cols="col" :gutter="10">
         <div v-for="(img, index) in images" :key="index">
@@ -12,19 +19,18 @@
       </masonry>
     </div>
 
-    
-<transition name="fade">
-    <div class="fab" v-if="homeScrolled"  @click="scrollToTop">
-      <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
-    </div>
-</transition>
-    <f7-button
+    <transition name="fade">
+      <div class="fab" v-if="homeScrolled" @click="scrollToTop">
+        <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+      </div>
+    </transition>
+    <!-- <f7-button
       v-show="!onFavoritesPage"
       v-if="images.length > 0"
       flat
       class="btn text-color-white"
       @click="loadMoreImages"
-    >Load More</f7-button>
+    >Load More</f7-button>-->
 
     <f7-popup
       class="my-popup"
@@ -33,7 +39,7 @@
       @popup:closed="open = false"
     >
       <f7-view>
-        <f7-page class="pop">
+        <f7-page class="pop" infinite :infinite-distance="1" @infinite="loadMoreTags">
           <f7-icon class="arrowDown" material="arrow_drop_down"></f7-icon>
           <f7-block>
             <div class="title-wrap" id="top">
@@ -63,15 +69,15 @@
           <f7-block>
             <div v-if="tags.length > 0" class="tag-wrap">
               <div class="btn-wrap" v-for="(tag , i) in tags" :key="i">
-                <button class="tag" @click="pageOne(tag)" fill>{{ tag }}</button>
+                <button class="tag" @click="tagClicked(tag)" fill>{{ tag }}</button>
               </div>
             </div>
           </f7-block>
-<transition name="fade">
-          <div class="fab" v-if="popupScrolled" @click="scrollToTop">
-            <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
-          </div>
-</transition>
+          <transition name="fade">
+            <div class="fab" v-if="popupScrolled" @click="scrollToTop">
+              <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+            </div>
+          </transition>
           <f7-block>
             <div class="images text-color-white">
               <div class="tag-image-wrap">
@@ -84,13 +90,16 @@
                   </div>
                 </masonry>
               </div>
-
-              <f7-button
-                v-if="tagImages.length > 0"
-                flat
-                class="btn text-color-white"
-                @click="loadMoreTags()"
-              >Load More</f7-button>
+              <!-- <f7-row tag="p">
+                <f7-col tag="span">
+                  <f7-button
+                    v-if="tagImages.length > 0"
+                    flat
+                    class="btn text-color-white"
+                    @click="loadMoreTags()"
+                  >Load More</f7-button>
+                </f7-col>
+              </f7-row>-->
             </div>
           </f7-block>
         </f7-page>
@@ -130,7 +139,9 @@ export default {
       pageOn: "home",
       favoritesArray: [],
       imageData: {},
-      onFavoritesPage: false
+      onFavoritesPage: false,
+      loaded: false,
+      popupImagesLoaded: false
     };
   },
 
@@ -176,6 +187,7 @@ export default {
     },
 
     loadFavorites() {
+      this.preloader = false;
       this.images = this.favoritesArray;
     },
 
@@ -230,6 +242,9 @@ export default {
     loadImages() {
       this.$store.dispatch("loadInfo").then(
         response => {
+          if (response) {
+            this.loaded = true;
+          }
           this.arrayType = response[0].array;
           response = response.sort(() => Math.random() - 0.5);
           response.forEach(x => this.images.push(x));
@@ -238,15 +253,18 @@ export default {
           console.error("Got nothing from server");
         }
       );
+      this.loaded = false;
     },
     loadMoreImages() {
-      this.$store.dispatch("incrementPage", "home");
-      if (this.arrayType == "memes" || this.arrayType == "tags") {
-        this.loadImages();
-        
-      } else {
-        this.searchImageMethod(this.search);
+      if (this.loaded) {
+       this.$store.dispatch("incrementPage", "home");
+        if (this.arrayType == "memes" || this.arrayType == "tags") {
+          this.loadImages();
+        } else {
+          this.searchImageMethod(this.search);
+        }
       }
+      
     },
     getImageData(id, image, desc, tags, favorite, link) {
       let favoriteIDs = this.favoritesArray.map(x => x.id);
@@ -272,20 +290,23 @@ export default {
     },
 
     getTagImages(tags) {
-      this.tagImages = [];
       this.tagType = "tags";
 
       let page = this.$store.state.page;
+      console.log(page);
       if (tags.length == 0) {
         tags = [this.searchInput];
       }
       this.$store.dispatch("tagImages", tags).then(
         response => {
+          if (response) {
+            this.popupImagesLoaded = true;
+          }
           if (tags.length > 0) {
             this.arrayType = response[0].array;
             response = response.sort(() => Math.random() - 0.5);
             if (page > 1) {
-              console.log("pushing");
+              
               response.forEach(x => this.tagImages.push(x));
             } else {
               this.tagImages = response;
@@ -296,17 +317,21 @@ export default {
           console.error("Got nothing from server");
         }
       );
+      this.popupImagesLoaded = false;
     },
     getSingleTag(tag) {
       this.tagType = "tag";
       let page = this.$store.state.page;
+
       this.$store.dispatch("singleTag", tag).then(
         response => {
-          console.log(response)
+          if (response) {
+            this.popupImagesLoaded = true;
+          }
+
           this.arrayType = response[0].array;
           response = response.sort(() => Math.random() - 0.5);
           if (page > 1) {
-            console.log("pushing");
             response.forEach(x => this.tagImages.push(x));
           } else {
             this.tagImages = response;
@@ -316,69 +341,61 @@ export default {
           console.error("Got nothing from server");
         }
       );
+      this.popupImagesLoaded = false;
+    },
+    tagClicked(tag) {
+      this.$store.state.page = 1;
+      this.getSingleTag(tag);
     },
     loadMoreTags() {
-      this.$store.dispatch("incrementPage", "popup");
-      if (this.tagType == "tags") {
-        this.getTagImages(this.tags);
-      } else {
-        this.getSingleTag(this.tag);
+      if (this.popupImagesLoaded) {
+        this.$store.dispatch("incrementPage", "popup");
+        if (this.tagType == "tags") {
+          this.getTagImages(this.tags);
+        } else {
+          this.getSingleTag(this.tag);
+        }
       }
     },
 
-    pageOne(tag) {
-      this.tagType = "tag";
-
-      let page = this.$store.state.page;
-      this.tag = tag;
-      this.$store.dispatch("singleTag", tag).then(
-        response => {
-          response = response.sort(() => Math.random() - 0.5);
-          
-          if (page > 1) {
-            response.forEach(x => this.tagImages.push(x));
-          } else {
-            this.tagImages = response;
-          }
-        },
-        error => {
-          console.error("Got nothing from server");
-        }
-      );
-    },
-
     searchImageMethod(query) {
-      let page = this.$store.state.page;
+      
+      let page = this.$store.state.homePage;
       this.search = query;
       this.$store.dispatch("imageSearch", query).then(
         response => {
+          if (response) {
+            this.loaded = true;
+          }
           this.arrayType = response[0].array;
           if (page > 1) {
             response.forEach(x => this.images.push(x));
           } else {
             this.images = response;
           }
-          this.scrollToTop();
+          console.log(this.arrayType)
         },
         error => {
           console.error("Got nothing from server");
         }
       );
+      this.loaded = false;
     }
   },
 
   watch: {
     imageType(newVal, oldVal) {
       if (newVal) {
-        this.$store.state.page = 1;
+        this.$store.state.homePage = 1;
         this.images = [];
-        this.loadImages(1);
+        this.loadImages();
       }
     },
     searchInput(newVal, oldVal) {
       if (newVal) {
-        this.$store.state.page = 1;
+        this.$store.state.homePage = 1;
         this.searchImageMethod(newVal);
+        this.scrollToTop();
       }
     },
     changeHomePage(newVal, oldVal) {
@@ -387,7 +404,8 @@ export default {
         this.onFavoritesPage = true;
       } else {
         this.images = [];
-        this.loadImages(1);
+        this.$store.state.homePage = 1;
+        this.loadImages();
         this.onFavoritesPage = false;
       }
     }
@@ -417,30 +435,29 @@ img {
 }
 .fab {
   background-color: #0aaf0a;
-  width:70px;
+  width: 70px;
   height: 70px;
   border-radius: 50%;
   position: fixed;
   bottom: 25px;
   right: 25px;
-  display:flex;
+  display: flex;
   justify-content: center;
   align-items: center;
-  
 }
 .fab .i {
   font-size: 35px;
-  color:white;
+  color: white;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
-
-
 
 .pop {
   color: #08da08;
