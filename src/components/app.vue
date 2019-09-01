@@ -22,8 +22,8 @@
             
             <f7-block-title class="text-color-green">Other</f7-block-title>
             <f7-list>
-               <f7-list-item class="panel-close" title="Home" @click="changePage('home')" link="#"></f7-list-item>
-               <f7-list-item  class="panel-close" title="Favorites" @click="changePage('favorites')" link="#"></f7-list-item>
+               <f7-list-item class="panel-close" title="Home" @click="backToHome" link="#"></f7-list-item>
+               <f7-list-item  class="panel-close" title="Favorites" @click="getFavorites" link="#"></f7-list-item>
               <f7-list-item  class="panel-close" title="Information" link="#"></f7-list-item>
               <f7-list-item  class="panel-close" title="Contact" link="#"></f7-list-item>
             
@@ -91,14 +91,11 @@ export default {
       this.$store.dispatch("imageType", 'images')
     
     },
-    changePage(page) {
-      this.$store.dispatch('changeHomePage', page)
-    },
     getFavorites() {
-
+       this.$store.dispatch('getFavorites')
     },
-    getHome() {
-
+    backToHome() {
+      this.$store.dispatch('backToHome')
     }
     
     

@@ -398,20 +398,28 @@ export default {
         this.scrollToTop();
       }
     },
-    changeHomePage(newVal, oldVal) {
-      if (newVal == "favorites") {
+    getFavorites(newVal, oldVal) {
+      console.log(newVal)
+      if (newVal) {
         this.loadFavorites();
         this.onFavoritesPage = true;
-      } else {
+        this.$store.state.getFavorites = false
+      } 
+    },
+    backToHome(newVal, oldVal) {
+      console.log(newVal)
+      if(newVal) {
+        
         this.images = [];
         this.$store.state.homePage = 1;
         this.loadImages();
         this.onFavoritesPage = false;
+        this.$store.state.backToHome = false
       }
     }
   },
   computed: {
-    ...mapGetters(["imageType", "changeHomePage"]),
+    ...mapGetters(["imageType", "getFavorites", "backToHome"]),
 
     isFavorite() {
       return this.favorite;

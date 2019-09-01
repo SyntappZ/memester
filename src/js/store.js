@@ -11,7 +11,8 @@ export default new Vuex.Store({
     page: 1,
     homePage: 1,
     imageType: "images",
-    changeHomePage: "home"
+    getFavorites: false,
+    backToHome: false,
   },
   mutations: {
     incrementPage(state, page) {
@@ -24,11 +25,19 @@ export default new Vuex.Store({
     },
     changeHomePage(state, page) {
       state.changeHomePage = page;
-    }
+    },
+    getFavorites(state){
+      state.getFavorites = true
+    },
+    backToHome(state) {
+      state.backToHome = true
+    },
   },
   getters: {
     imageType: state => state.imageType,
-    changeHomePage: state => state.changeHomePage
+    changeHomePage: state => state.changeHomePage,
+    getFavorites: state => state.getFavorites,
+    backToHome: state => state.backToHome
   },
   actions: {
     incrementPage(context, page) {
@@ -37,8 +46,12 @@ export default new Vuex.Store({
     imageType({ commit }, type) {
       commit("imageType", type);
     },
-    changeHomePage({ commit }, page) {
-      commit("changeHomePage", page);
+    
+    getFavorites({ commit }) {
+      commit("getFavorites");
+    },
+    backToHome({ commit }) {
+      commit("backToHome");
     },
 
     loadInfo(context) {
