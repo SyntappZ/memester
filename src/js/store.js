@@ -75,48 +75,60 @@ export default new Vuex.Store({
         }
         
         let len = memes.length;
+        console.log(page)
          for (let i = 0; i < len; i++) {
           axios({
             method: "get",
-            url: `https://api.imgur.com/3/gallery/t/${memes[i]}/top/all/${3}`,
+            url: `https://api.imgur.com/3/gallery/t/${memes[i]}/top/all/${page}`,
             headers: {
               Authorization: "Client-ID 7711bc539737c6e"
             }
           })
             .then(response => {
-              let images = response.data.data.items;
               let all = [];
-              console.log(response)
+              let images = response.data.data.items;
+             
+            
               images.forEach(x => {
-                let url = "";
+                  let url
+                  let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
 
-                let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
+                  let linkCheck = reg.test(x.link);
+                  if (linkCheck) {
+                    url = x.link;
+                    //console.log(url)
+                  } else {
+                    
+                    if(x.images.length == 0) {
+                      url = 'none'
+                    }else{
+                      url = x.images[0].link
+                    }
+                  
+                  }
+                      
+                    let tags = x.tags.map(x => x.name);
 
-                let linkCheck = reg.test(x.link);
-                if (linkCheck) {
-                  url = x.link;
-                } else {
-                  url = x.images[0].link;
-                }
-                
-                let tags = x.tags.map(x => x.name);
-
-                let loader = require("../loading.svg");
-
-                all.push({
-                  array: "memes",
-                  id: x.id,
-                  desc: x.title,
-                  image: url,
-                  link: {
-                    src: url,
-                    loading: loader
-                  },
-                  tags: tags,
-                  height: x.cover_height,
-                  favorite: false
-                });
-              });
+                    let loader = require("../loading.svg");
+                    if(url !== 'none') {
+                      all.push({
+                        array: "tags",
+                        id: x.id,
+                        desc: x.title,
+                        image: url,
+                        link: {
+                          src: url,
+                          loading: loader
+                        },
+                        tags: tags,
+                        height: x.cover_height,
+                        favorite: false
+                      });
+                    }
+             
+            
+              })
+              
               
               
               let noMP4;
@@ -130,7 +142,7 @@ export default new Vuex.Store({
                   .filter(x => x.link.src.match(/gif$/))
                   .filter(x => x.height < 1000);
               }
-
+             
                noMP4.forEach((x, i, a) => {
                 memeArray.push(x);
               
@@ -138,11 +150,11 @@ export default new Vuex.Store({
               
               
              
-             console.log(done)
+          
              if(done == len) {
-               console.log('done')
+              
                
-              // resolve(memeArray)
+             resolve(memeArray)
                
              }
              done++

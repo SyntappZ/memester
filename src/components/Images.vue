@@ -12,16 +12,12 @@
       </masonry>
     </div>
 
-    <f7-fab
-      v-if="homeScrolled"
-      position="right-bottom"
-      @click="scrollToTop"
-      slot="fixed"
-      color="red"
-    >
-      <f7-icon material="keyboard_arrow_up"></f7-icon>
-    </f7-fab>
-
+    
+<transition name="fade">
+    <div class="fab" v-if="homeScrolled"  @click="scrollToTop">
+      <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+    </div>
+</transition>
     <f7-button
       v-show="!onFavoritesPage"
       v-if="images.length > 0"
@@ -71,17 +67,11 @@
               </div>
             </div>
           </f7-block>
-
-          <f7-fab
-            v-if="popupScrolled"
-            position="right-bottom"
-            slot="fixed"
-            @click="scrollToTop"
-            color="red"
-          >
-            <f7-icon material="keyboard_arrow_up"></f7-icon>
-          </f7-fab>
-
+<transition name="fade">
+          <div class="fab" v-if="popupScrolled" @click="scrollToTop">
+            <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+          </div>
+</transition>
           <f7-block>
             <div class="images text-color-white">
               <div class="tag-image-wrap">
@@ -180,23 +170,20 @@ export default {
   },
 
   methods: {
-      scrollToTop() {
+    scrollToTop() {
       let page = $$(".page-content");
       page.scrollTop(0);
     },
 
-   
     loadFavorites() {
       this.images = this.favoritesArray;
     },
 
-   
-   
     closePopUp() {
       this.open = false;
     },
-   
-     shareImage() {
+
+    shareImage() {
       var options = {
         files: [this.image]
       };
@@ -217,7 +204,7 @@ export default {
       );
     },
 
-     addToFavorites() {
+    addToFavorites() {
       if (this.favorite) {
         let favoriteIDs = this.favoritesArray.map(x => x.id);
         let index = favoriteIDs.indexOf(this.id);
@@ -241,12 +228,10 @@ export default {
       }
     },
     loadImages() {
-     
       this.$store.dispatch("loadInfo").then(
         response => {
-         
           this.arrayType = response[0].array;
-           response = response.sort(() => Math.random() - 0.5);
+          response = response.sort(() => Math.random() - 0.5);
           response.forEach(x => this.images.push(x));
         },
         error => {
@@ -254,13 +239,12 @@ export default {
         }
       );
     },
-     loadMoreImages() {
-      this.$store.dispatch("incrementPage", 'home');
+    loadMoreImages() {
+      this.$store.dispatch("incrementPage", "home");
       if (this.arrayType == "memes" || this.arrayType == "tags") {
         this.loadImages();
-        console.log('memes')
-      } else {
         
+      } else {
         this.searchImageMethod(this.search);
       }
     },
@@ -287,7 +271,7 @@ export default {
       }
     },
 
-      getTagImages(tags) {
+    getTagImages(tags) {
       this.tagImages = [];
       this.tagType = "tags";
 
@@ -301,7 +285,7 @@ export default {
             this.arrayType = response[0].array;
             response = response.sort(() => Math.random() - 0.5);
             if (page > 1) {
-              console.log('pushing')
+              console.log("pushing");
               response.forEach(x => this.tagImages.push(x));
             } else {
               this.tagImages = response;
@@ -318,10 +302,11 @@ export default {
       let page = this.$store.state.page;
       this.$store.dispatch("singleTag", tag).then(
         response => {
+          console.log(response)
           this.arrayType = response[0].array;
           response = response.sort(() => Math.random() - 0.5);
           if (page > 1) {
-            console.log('pushing')
+            console.log("pushing");
             response.forEach(x => this.tagImages.push(x));
           } else {
             this.tagImages = response;
@@ -332,8 +317,8 @@ export default {
         }
       );
     },
-     loadMoreTags() {
-      this.$store.dispatch("incrementPage", 'popup');
+    loadMoreTags() {
+      this.$store.dispatch("incrementPage", "popup");
       if (this.tagType == "tags") {
         this.getTagImages(this.tags);
       } else {
@@ -341,14 +326,15 @@ export default {
       }
     },
 
-     pageOne(tag) {
+    pageOne(tag) {
       this.tagType = "tag";
-      
+
       let page = this.$store.state.page;
       this.tag = tag;
       this.$store.dispatch("singleTag", tag).then(
         response => {
           response = response.sort(() => Math.random() - 0.5);
+          
           if (page > 1) {
             response.forEach(x => this.tagImages.push(x));
           } else {
@@ -361,7 +347,7 @@ export default {
       );
     },
 
-     searchImageMethod(query) {
+    searchImageMethod(query) {
       let page = this.$store.state.page;
       this.search = query;
       this.$store.dispatch("imageSearch", query).then(
@@ -381,12 +367,6 @@ export default {
     }
   },
 
-  
-    
-   
-
-  
-   
   watch: {
     imageType(newVal, oldVal) {
       if (newVal) {
@@ -402,16 +382,13 @@ export default {
       }
     },
     changeHomePage(newVal, oldVal) {
-      
       if (newVal == "favorites") {
-       
         this.loadFavorites();
-        this.onFavoritesPage = true
+        this.onFavoritesPage = true;
       } else {
-       
         this.images = [];
         this.loadImages(1);
-        this.onFavoritesPage = false
+        this.onFavoritesPage = false;
       }
     }
   },
@@ -438,9 +415,33 @@ img {
   border-radius: 5px;
   transition: 1s ease;
 }
-/* .fab {
-  color: #08da08;
-} */
+.fab {
+  background-color: #0aaf0a;
+  width:70px;
+  height: 70px;
+  border-radius: 50%;
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+.fab .i {
+  font-size: 35px;
+  color:white;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+
+
 .pop {
   color: #08da08;
   background: rgb(32, 32, 32);
