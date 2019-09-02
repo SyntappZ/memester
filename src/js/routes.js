@@ -1,5 +1,5 @@
 import HomePage from "../pages/home.vue";
-import AboutPage from "../pages/about.vue";
+
 
 import DynamicRoutePage from "../pages/dynamic-route.vue";
 import RequestAndLoad from "../pages/request-and-load.vue";
@@ -10,10 +10,7 @@ var routes = [
     path: "/",
     component: HomePage
   },
-  {
-    path: "/about/",
-    component: AboutPage
-  },
+ 
 
   {
     path: "/dynamic-route/blog/:blogId/post/:postId/",
