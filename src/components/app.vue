@@ -79,14 +79,17 @@ export default {
     },
     getFavorites() {
       this.$store.dispatch("getFavorites");
+      this.$store.dispatch("changeTitle", 'favorites');
     },
     backToHome() {
       this.$store.dispatch("backToHome");
+      this.$store.dispatch("changeTitle", 'memester');
     },
     getAboutPage() {
       this.$store.dispatch("aboutPage");
     }
   },
+  
   mounted() {
     this.$f7ready(f7 => {
       // Init cordova APIs (see cordova-app.js)

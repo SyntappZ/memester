@@ -14,7 +14,8 @@ export default new Vuex.Store({
     getFavorites: false,
     backToHome: false,
     aboutPageOpen: false,
-    searching: ""
+    searching: "",
+    title: 'memester'
   },
   mutations: {
     incrementPage(state, page) {
@@ -35,6 +36,9 @@ export default new Vuex.Store({
     },
     aboutPage(state) {
       state.aboutPageOpen = true;
+    },
+    changeTitle(state, title) {
+      state.title = title
     }
   },
   getters: {
@@ -43,6 +47,7 @@ export default new Vuex.Store({
     getFavorites: state => state.getFavorites,
     backToHome: state => state.backToHome,
     aboutPage: state => state.aboutPageOpen,
+    title: state => state.title
    
 
   },
@@ -63,6 +68,10 @@ export default new Vuex.Store({
     aboutPage({ commit }) {
       commit("aboutPage");
     },
+    changeTitle({ commit }, title) {
+      commit("changeTitle", title);
+    },
+
 
     loadInfo(context) {
       return new Promise((resolve, reject) => {

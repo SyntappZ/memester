@@ -34,6 +34,7 @@
 import images from "../components/Images";
 import cordovaApp from "../js/cordova-app.js";
 import routes from "../js/routes.js";
+import { mapGetters } from 'vuex'
 import $$ from "Dom7";
 export default {
   components: {
@@ -41,7 +42,7 @@ export default {
   },
   data() {
     return {
-      title: "memester",
+      
       input: "",
       searchQuery: ""
     };
@@ -49,10 +50,14 @@ export default {
   methods: {
     getInfo() {
       this.searchQuery = this.input;
+      this.$store.dispatch("changeTitle", this.input);
       let searchBar = $$("#searchBar")[0].f7Searchbar;
       searchBar.clear();
       searchBar.disable();
     }
+  },
+  computed: {
+   ...mapGetters(['title'])
   }
 };
 </script>
