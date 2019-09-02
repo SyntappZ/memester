@@ -31,11 +31,10 @@
 </template>
 
 <script>
-
 import images from "../components/Images";
 import cordovaApp from "../js/cordova-app.js";
 import routes from "../js/routes.js";
-import $$ from 'Dom7'
+import $$ from "Dom7";
 export default {
   components: {
     images
@@ -49,10 +48,10 @@ export default {
   },
   methods: {
     getInfo() {
-    this.searchQuery = this.input;
-     let searchBar = $$('#searchBar')[0].f7Searchbar
-     searchBar.clear()
-     searchBar.disable()
+      this.searchQuery = this.input;
+      let searchBar = $$("#searchBar")[0].f7Searchbar;
+      searchBar.clear();
+      searchBar.disable();
     }
   }
 };

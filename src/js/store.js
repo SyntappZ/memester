@@ -13,12 +13,12 @@ export default new Vuex.Store({
     imageType: "images",
     getFavorites: false,
     backToHome: false,
-    searching: ''
+    aboutPageOpen: false,
+    searching: ""
   },
   mutations: {
     incrementPage(state, page) {
       page == "home" ? state.homePage++ : state.page++;
-      
     },
 
     imageType(state, type) {
@@ -27,18 +27,24 @@ export default new Vuex.Store({
     changeHomePage(state, page) {
       state.changeHomePage = page;
     },
-    getFavorites(state){
-      state.getFavorites = true
+    getFavorites(state) {
+      state.getFavorites = true;
     },
     backToHome(state) {
-      state.backToHome = true
+      state.backToHome = true;
     },
+    aboutPage(state) {
+      state.aboutPageOpen = true;
+    }
   },
   getters: {
     imageType: state => state.imageType,
     changeHomePage: state => state.changeHomePage,
     getFavorites: state => state.getFavorites,
-    backToHome: state => state.backToHome
+    backToHome: state => state.backToHome,
+    aboutPage: state => state.aboutPageOpen,
+   
+
   },
   actions: {
     incrementPage(context, page) {
@@ -47,12 +53,15 @@ export default new Vuex.Store({
     imageType({ commit }, type) {
       commit("imageType", type);
     },
-    
+
     getFavorites({ commit }) {
       commit("getFavorites");
     },
     backToHome({ commit }) {
       commit("backToHome");
+    },
+    aboutPage({ commit }) {
+      commit("aboutPage");
     },
 
     loadInfo(context) {
@@ -61,7 +70,7 @@ export default new Vuex.Store({
         let done = 1;
         let memes;
         let page = context.state.homePage;
-       
+
         if (this.state.imageType == "images") {
           memes = [
             "memes",
@@ -98,17 +107,19 @@ export default new Vuex.Store({
               let images = response.data.data.items;
 
               images.forEach(x => {
-                let url;
+                let url, size;
                 let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
 
                 let linkCheck = reg.test(x.link);
                 if (linkCheck) {
                   url = x.link;
+                  size = x.size;
                 } else {
                   if (x.images.length == 0) {
                     url = "none";
                   } else {
                     url = x.images[0].link;
+                    size = x.images[0].size;
                   }
                 }
 
@@ -127,7 +138,8 @@ export default new Vuex.Store({
                     },
                     tags: tags,
                     height: x.cover_height,
-                    favorite: false
+                    favorite: false,
+                    size: size
                   });
                 }
               });
@@ -141,7 +153,8 @@ export default new Vuex.Store({
               } else {
                 noMP4 = all
                   .filter(x => x.link.src.match(/gif$/))
-                  .filter(x => x.height < 1000);
+                  .filter(x => x.height < 1000)
+                  .filter(x => x.size < 3000000);
               }
 
               noMP4.forEach(x => {
@@ -165,8 +178,6 @@ export default new Vuex.Store({
         let tagArray = [];
         let len = tagArr.length;
         let page = context.state.page;
-        let searching = context.state.searching
-        
 
         let done = 1;
         for (let i = 0; i < tagArr.length; i++) {
@@ -180,17 +191,19 @@ export default new Vuex.Store({
             .then(response => {
               let images = response.data.data.items;
               let all = [];
-             
+
               images.forEach(x => {
                 let url = "";
-
+                let size = "";
                 let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
 
                 let linkCheck = reg.test(x.link);
                 if (linkCheck) {
                   url = x.link;
+                  size = x.size;
                 } else {
                   url = x.images[0].link;
+                  size = x.images[0].size;
                 }
 
                 let tags = x.tags.map(x => x.name);
@@ -208,11 +221,11 @@ export default new Vuex.Store({
                   },
                   tags: tags,
                   height: x.cover_height,
-                  favorite: false
+                  favorite: false,
+                  size: size
                 });
               });
 
-              
               let noMP4;
 
               if (this.state.imageType == "images") {
@@ -222,27 +235,26 @@ export default new Vuex.Store({
               } else {
                 noMP4 = all
                   .filter(x => x.link.src.match(/gif$/))
-                  .filter(x => x.height < 1000);
+                  .filter(x => x.height < 1000)
+                  .filter(x => x.size < 3000000);
               }
 
               noMP4.forEach(x => {
                 tagArray.push(x);
               });
-            
+
               if (done == len) {
-                if(tagArray.length > 0) {
+                if (tagArray.length > 0) {
                   resolve(tagArray);
-                }else{
-                  resolve(null)
+                } else {
+                  resolve(null);
                 }
-                
               }
               done++;
             })
             .catch(function(error) {
               reject(error);
-            })
-           
+            });
         }
       });
     },
@@ -250,9 +262,6 @@ export default new Vuex.Store({
     singleTag(context, tag) {
       return new Promise((resolve, reject) => {
         let page = context.state.page;
-        let tagArray = [];
-        let len = 1;
-        let done = 0;
 
         axios({
           method: "get",
@@ -267,14 +276,16 @@ export default new Vuex.Store({
 
             images.forEach(x => {
               let url = "";
-
+              let size = "";
               let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
 
               let linkCheck = reg.test(x.link);
               if (linkCheck) {
                 url = x.link;
+                size = x.size;
               } else {
                 url = x.images[0].link;
+                size = x.images[0].size;
               }
 
               let tags = x.tags.map(x => x.name);
@@ -293,32 +304,27 @@ export default new Vuex.Store({
                 tags: tags,
                 height: x.cover_height,
                 favorite: false,
-                page: page
+                size: size
               });
             });
 
-            let tagsAdded = 0;
-            let noMP4 = all
-              .filter(x => !x.link.src.match(/mp4$|gif$/))
-              .filter(x => x.height < 1000);
+            let noMP4;
 
-            noMP4.forEach(x => {
-              tagArray.push(x);
-
-              tagsAdded++;
-            });
-
-            if (tagsAdded == noMP4.length) {
-              done++;
+            if (this.state.imageType == "images") {
+              noMP4 = all
+                .filter(x => !x.link.src.match(/mp4$|gif$/))
+                .filter(x => x.height < 1000);
+            } else {
+              noMP4 = all
+                .filter(x => x.link.src.match(/gif$/))
+                .filter(x => x.height < 1000)
+                .filter(x => x.size < 4000000);
             }
+
+            resolve(noMP4);
           })
           .catch(function(error) {
             reject(error);
-          })
-          .finally(() => {
-            if (done == len) {
-              resolve(tagArray);
-            }
           });
       });
     },
@@ -326,9 +332,9 @@ export default new Vuex.Store({
     imageSearch(context, name) {
       return new Promise((resolve, reject) => {
         let page = context.state.homePage;
-        context.state.searching = name
+        context.state.searching = name;
         let all = [];
-        
+
         axios({
           method: "get",
           url: `https://api.imgur.com/3/gallery/search/top/${page}?q=` + name,
@@ -342,11 +348,14 @@ export default new Vuex.Store({
             images.forEach(x => {
               let reg = new RegExp(/.png$|.jpg$|.gif$|.mp4$/);
               let arr = "";
+              let size;
               let linkCheck = reg.test(x.link);
               if (linkCheck) {
                 arr = x.link;
+                size = x.size;
               } else {
                 arr = x.images[0].link;
+                size = x.images[0].size;
               }
               let height = x.cover_height;
               if (x.cover_height == undefined) {
@@ -368,7 +377,8 @@ export default new Vuex.Store({
                 tags: tags,
                 height: height,
                 favorite: false,
-                page: page
+                page: page,
+                size: size
               });
             });
 
@@ -380,7 +390,8 @@ export default new Vuex.Store({
             } else {
               noMP4 = all
                 .filter(x => x.link.src.match(/gif$/))
-                .filter(x => x.height < 1000);
+                .filter(x => x.height < 1000)
+                .filter(x => x.size < 4000000);
             }
             resolve(noMP4);
           })

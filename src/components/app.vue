@@ -4,31 +4,23 @@
     <f7-statusbar></f7-statusbar>
 
     <!-- Right panel with reveal effect-->
-    <f7-panel right reveal theme-dark 
-     
-      
-    >
+    <f7-panel right reveal theme-dark>
       <f7-view>
         <f7-page>
           <f7-navbar title="Menu"></f7-navbar>
-          
-            <f7-block-title class="text-color-green">Options</f7-block-title>
-            <f7-list>
-             
-              <f7-list-item class="panel-close" title="Images" @click="showImages" link="#"></f7-list-item>
-              <f7-list-item class="panel-close" title="Gifs" @click="showGifs" link="#"></f7-list-item>
-            </f7-list>
-        
-            
-            <f7-block-title class="text-color-green">Other</f7-block-title>
-            <f7-list>
-               <f7-list-item class="panel-close" title="Home" @click="backToHome" link="#"></f7-list-item>
-               <f7-list-item  class="panel-close" title="Favorites" @click="getFavorites" link="#"></f7-list-item>
-              <f7-list-item  class="panel-close" title="Information" link="#"></f7-list-item>
-              <f7-list-item  class="panel-close" title="Contact" link="#"></f7-list-item>
-            
-            </f7-list>
-          
+
+          <f7-block-title class="text-color-green">Options</f7-block-title>
+          <f7-list>
+            <f7-list-item class="panel-close" title="Images" @click="showImages" link="#"></f7-list-item>
+            <f7-list-item class="panel-close" title="Gifs" @click="showGifs" link="#"></f7-list-item>
+          </f7-list>
+
+          <f7-block-title class="text-color-green">Other</f7-block-title>
+          <f7-list>
+            <f7-list-item class="panel-close" title="Home" @click="backToHome" link="#"></f7-list-item>
+            <f7-list-item class="panel-close" title="Favorites" @click="getFavorites" link="#"></f7-list-item>
+            <f7-list-item class="panel-close" title="Information" @click="getAboutPage" link="#"></f7-list-item>
+          </f7-list>
         </f7-page>
       </f7-view>
     </f7-panel>
@@ -51,10 +43,7 @@ export default {
         theme: "auto", // Automatic theme detection
         // App root data
         data() {
-          return {
-            
-           
-          };
+          return {};
         },
 
         // App routes
@@ -71,10 +60,9 @@ export default {
           iosOverlaysWebView: true,
           androidOverlaysWebView: false
         }
-      },
+      }
 
       // Login screen data
-     
     };
   },
   methods: {
@@ -84,21 +72,20 @@ export default {
       );
     },
     showGifs() {
-      
-      this.$store.dispatch("imageType", 'gifs')
+      this.$store.dispatch("imageType", "gifs");
     },
     showImages() {
-      this.$store.dispatch("imageType", 'images')
-    
+      this.$store.dispatch("imageType", "images");
     },
     getFavorites() {
-       this.$store.dispatch('getFavorites')
+      this.$store.dispatch("getFavorites");
     },
     backToHome() {
-      this.$store.dispatch('backToHome')
+      this.$store.dispatch("backToHome");
+    },
+    getAboutPage() {
+      this.$store.dispatch("aboutPage");
     }
-    
-    
   },
   mounted() {
     this.$f7ready(f7 => {

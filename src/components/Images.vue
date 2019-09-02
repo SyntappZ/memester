@@ -1,5 +1,42 @@
 <template >
   <div>
+    <f7-popup class="about" :opened="aboutOpen" @popup:closed="aboutOpen = false">
+      <f7-page class="aboutPage">
+        <f7-navbar class="aboutNav text-color-white" title="Information">
+          <f7-nav-right>
+            <f7-link @click="aboutPageOpen(false)" popup-close class="text-color-green">Close</f7-link>
+          </f7-nav-right>
+        </f7-navbar>
+        <f7-block>
+          <h3>syntappz</h3>
+          <p>Thanks for trying my app, if you want to contact me my email is syntappz@gmail.com you can press the button below</p>
+        </f7-block>
+        <f7-block>
+          <h3>contact</h3>
+
+          <f7-button class="external text-color-green" href="mailto:syntappz@gmail.com" outline>
+            send email
+            <f7-icon class="i" material="arrow_forward"></f7-icon>
+          </f7-button>
+        </f7-block>
+
+        <div class=" list links-list">
+          <ul class="aboutPage">
+            <li>
+              <a  class="external text-color-green"  href="https://play.google.com/store/apps/developer?id=SyntappZ&gl=GB">Playstore</a>
+            </li>
+            <li>
+              <a  class="external text-color-green" href="https://syntappz.netlify.com">More Projects</a>
+            </li>
+          
+          </ul>
+        </div>
+      
+
+        <p class="auth">SyntappZ &copy; 2019</p>
+      </f7-page>
+    </f7-popup>
+
     <f7-page v-if="onFavoritesPage" name="home" class="images text-color-white">
       <div class="wrap">
         <masonry :cols="col" :gutter="10">
@@ -82,7 +119,12 @@
           <f7-block>
             <f7-row>
               <f7-col>
-                <f7-button @click="shareImage" color="green" outline>share</f7-button>
+                <f7-button
+                  @click="shareImage"
+                  class="btn ripple-color-green"
+                  color="green"
+                  outline
+                >share</f7-button>
               </f7-col>
             </f7-row>
           </f7-block>
@@ -90,7 +132,7 @@
           <f7-block>
             <div v-if="tags.length > 0" class="tag-wrap">
               <div class="btn-wrap" v-for="(tag , i) in tags" :key="i">
-                <button class="tag" @click="tagClicked(tag)" fill>{{ tag }}</button>
+                <button class="tag" @click="tagClicked(tag)">{{ tag }}</button>
               </div>
             </div>
           </f7-block>
@@ -154,7 +196,8 @@ export default {
       onFavoritesPage: false,
       loaded: false,
       popupImagesLoaded: false,
-      moreImages: true
+      moreImages: true,
+      aboutOpen: false
     };
   },
 
@@ -202,7 +245,11 @@ export default {
 
     loadFavorites() {
       this.preloader = false;
-      this.images = this.favoritesArray;
+    },
+
+    aboutPageOpen(open) {
+      this.aboutOpen = open;
+      console.log(this.aboutOpen);
     },
 
     closePopUp() {
@@ -287,7 +334,8 @@ export default {
           favorite = true;
         }
       });
-
+      this.tagImages = [];
+      this.moreImages = true;
       this.$store.state.page = 1;
       this.open = true;
       this.id = id;
@@ -340,7 +388,7 @@ export default {
       }
 
       error => {
-        console.error("Got nothing from server");
+        console.error("Got nothing from tag images");
       };
 
       this.popupImagesLoaded = false;
@@ -348,29 +396,41 @@ export default {
     getSingleTag(tag) {
       this.tagType = "tag";
       let page = this.$store.state.page;
-
+      this.moreImages = true;
       this.$store.dispatch("singleTag", tag).then(
         response => {
-          if (response) {
+          if (response.length > 0) {
             this.popupImagesLoaded = true;
-          }
+            this.arrayType = response[0].array;
 
-          this.arrayType = response[0].array;
-
-          response = response.sort(() => Math.random() - 0.5);
-          if (page > 1) {
-            response.forEach(x => this.tagImages.push(x));
+            response = response.sort(() => Math.random() - 0.5);
+            if (page > 1) {
+              response.forEach(x => this.tagImages.push(x));
+            } else {
+              this.tagImages = response;
+            }
           } else {
-            this.tagImages = response;
+            this.moreImages = false;
           }
         },
         error => {
-          console.error("Got nothing from server");
+          console.error("Got nothing from single tag");
         }
       );
       this.popupImagesLoaded = false;
     },
     tagClicked(tag) {
+      //.css('backgroundColor', '#0b690b'); .css('backgroundColor', '#08da08');
+      let tagBtn = $$(".tag");
+      tagBtn.forEach(x => {
+        if (x.innerText.toLowerCase() === tag) {
+          $$(x).transform("scale(0.9)");
+          setTimeout(() => {
+            $$(x).transform("scale(1)");
+          }, 100);
+        }
+      });
+
       this.$store.state.page = 1;
       this.getSingleTag(tag);
     },
@@ -439,10 +499,17 @@ export default {
         this.loadImages();
         this.$store.state.backToHome = false;
       }
+    },
+    aboutPage(newVal) {
+      if (newVal) {
+        this.onFavoritesPage = false;
+        this.aboutPageOpen(true);
+      }
+      this.$store.state.aboutPageOpen = false;
     }
   },
   computed: {
-    ...mapGetters(["imageType", "getFavorites", "backToHome"]),
+    ...mapGetters(["imageType", "getFavorites", "backToHome", "aboutPage"]),
 
     isFavorite() {
       return this.favorite;
@@ -571,6 +638,7 @@ img[lazy="loaded"] {
   text-transform: capitalize;
   letter-spacing: 1px;
   font-weight: 700;
+  transition: 0.1s ease;
 }
 .tag:focus {
   outline: none;
@@ -580,5 +648,20 @@ img[lazy="loaded"] {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+.aboutPage {
+  background-color: #222;
+  color: white;
+}
+.aboutNav {
+  background: #111;
+}
+.auth {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  text-align: center;
 }
 </style>
