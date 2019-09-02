@@ -1,37 +1,52 @@
 <template >
-  <f7-page
-    infinite
-    :infinite-distance="1"
-    @infinite="loadMoreImages"
-    :infinite-preloader="!onFavoritesPage"
-    name="home"
-    class="images text-color-white"
-  >
-    <div class="wrap">
-      <masonry :cols="col" :gutter="10">
-        <div v-for="(img, index) in images" :key="index">
-          <img
-            v-lazy="img.link"
-            @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite, img.link)"
-            popup-open=".my-popup"
-          />
-        </div>
-      </masonry>
-    </div>
-
-    <transition name="fade">
-      <div class="fab" v-if="homeScrolled" @click="scrollToTop">
-        <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+  <div>
+    <f7-page v-if="onFavoritesPage" name="home" class="images text-color-white">
+      <div class="wrap">
+        <masonry :cols="col" :gutter="10">
+          <div v-for="(img, index) in favoritesArray" :key="index">
+            <img
+              v-lazy="img.link"
+              @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite, img.link)"
+              popup-open=".my-popup"
+            />
+          </div>
+        </masonry>
       </div>
-    </transition>
-    <!-- <f7-button
-      v-show="!onFavoritesPage"
-      v-if="images.length > 0"
-      flat
-      class="btn text-color-white"
-      @click="loadMoreImages"
-    >Load More</f7-button>-->
 
+      <transition name="fade">
+        <div class="fab" v-if="homeScrolled" @click="scrollToTop">
+          <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+        </div>
+      </transition>
+    </f7-page>
+
+    <f7-page
+      v-else
+      infinite
+      :infinite-distance="1"
+      @infinite="loadMoreImages"
+      :infinite-preloader="!onFavoritesPage"
+      name="home"
+      class="images text-color-white"
+    >
+      <div class="wrap">
+        <masonry :cols="col" :gutter="10">
+          <div v-for="(img, index) in images" :key="index">
+            <img
+              v-lazy="img.link"
+              @click="getImageData(img.id, img.image, img.desc, img.tags, img.favorite, img.link)"
+              popup-open=".my-popup"
+            />
+          </div>
+        </masonry>
+      </div>
+
+      <transition name="fade">
+        <div class="fab" v-if="homeScrolled" @click="scrollToTop">
+          <f7-icon class="i" material="keyboard_arrow_up"></f7-icon>
+        </div>
+      </transition>
+    </f7-page>
     <f7-popup
       class="my-popup"
       :opened="open"
@@ -39,7 +54,13 @@
       @popup:closed="open = false"
     >
       <f7-view>
-        <f7-page class="pop" infinite :infinite-distance="1" @infinite="loadMoreTags">
+        <f7-page
+          class="pop"
+          :infinite="moreImages"
+          :infinite-distance="1"
+          @infinite="loadMoreTags"
+          :infinite-preloader="moreImages"
+        >
           <f7-icon class="arrowDown" material="arrow_drop_down"></f7-icon>
           <f7-block>
             <div class="title-wrap" id="top">
@@ -90,22 +111,13 @@
                   </div>
                 </masonry>
               </div>
-              <!-- <f7-row tag="p">
-                <f7-col tag="span">
-                  <f7-button
-                    v-if="tagImages.length > 0"
-                    flat
-                    class="btn text-color-white"
-                    @click="loadMoreTags()"
-                  >Load More</f7-button>
-                </f7-col>
-              </f7-row>-->
             </div>
+            <h4 v-if="!moreImages" class="noMore">no more images</h4>
           </f7-block>
         </f7-page>
       </f7-view>
     </f7-popup>
-  </f7-page>
+  </div>
 </template>
 
 <script>
@@ -141,7 +153,8 @@ export default {
       imageData: {},
       onFavoritesPage: false,
       loaded: false,
-      popupImagesLoaded: false
+      popupImagesLoaded: false,
+      moreImages: true
     };
   },
 
@@ -155,6 +168,7 @@ export default {
     let home = $$(page[2]);
     let popup = $$(page[3]);
 
+    setTimeout(() => {}, 5000);
     home.on("mouseover", () => {
       this.pageOn = "home";
     });
@@ -257,14 +271,13 @@ export default {
     },
     loadMoreImages() {
       if (this.loaded) {
-       this.$store.dispatch("incrementPage", "home");
+        this.$store.dispatch("incrementPage", "home");
         if (this.arrayType == "memes" || this.arrayType == "tags") {
           this.loadImages();
         } else {
           this.searchImageMethod(this.search);
         }
       }
-      
     },
     getImageData(id, image, desc, tags, favorite, link) {
       let favoriteIDs = this.favoritesArray.map(x => x.id);
@@ -291,32 +304,45 @@ export default {
 
     getTagImages(tags) {
       this.tagType = "tags";
-
+      this.moreImages = true;
       let page = this.$store.state.page;
-      console.log(page);
+
       if (tags.length == 0) {
-        tags = [this.searchInput];
-      }
-      this.$store.dispatch("tagImages", tags).then(
-        response => {
+        let query = this.searchInput;
+        this.$store.dispatch("imageSearch", query).then(response => {
           if (response) {
             this.popupImagesLoaded = true;
           }
-          if (tags.length > 0) {
+          response = response.sort(() => Math.random() - 0.5);
+          this.arrayType = response[0].array;
+          if (page > 1) {
+            response.forEach(x => this.tagImages.push(x));
+          } else {
+            this.tagImages = response;
+          }
+        });
+      } else {
+        this.$store.dispatch("tagImages", tags).then(response => {
+          if (response) {
+            this.popupImagesLoaded = true;
             this.arrayType = response[0].array;
+
             response = response.sort(() => Math.random() - 0.5);
             if (page > 1) {
-              
               response.forEach(x => this.tagImages.push(x));
             } else {
               this.tagImages = response;
             }
+          } else {
+            this.moreImages = false;
           }
-        },
-        error => {
-          console.error("Got nothing from server");
-        }
-      );
+        });
+      }
+
+      error => {
+        console.error("Got nothing from server");
+      };
+
       this.popupImagesLoaded = false;
     },
     getSingleTag(tag) {
@@ -330,6 +356,7 @@ export default {
           }
 
           this.arrayType = response[0].array;
+
           response = response.sort(() => Math.random() - 0.5);
           if (page > 1) {
             response.forEach(x => this.tagImages.push(x));
@@ -359,7 +386,7 @@ export default {
     },
 
     searchImageMethod(query) {
-      
+      this.onFavoritesPage = false;
       let page = this.$store.state.homePage;
       this.search = query;
       this.$store.dispatch("imageSearch", query).then(
@@ -373,7 +400,6 @@ export default {
           } else {
             this.images = response;
           }
-          console.log(this.arrayType)
         },
         error => {
           console.error("Got nothing from server");
@@ -402,16 +428,16 @@ export default {
       if (newVal) {
         this.loadFavorites();
         this.onFavoritesPage = true;
-        this.$store.state.getFavorites = false
-      } 
+        this.$store.state.getFavorites = false;
+      }
     },
     backToHome(newVal, oldVal) {
-      if(newVal) {
+      if (newVal) {
+        this.onFavoritesPage = false;
         this.images = [];
         this.$store.state.homePage = 1;
         this.loadImages();
-        this.onFavoritesPage = false;
-        this.$store.state.backToHome = false
+        this.$store.state.backToHome = false;
       }
     }
   },
@@ -548,5 +574,11 @@ img[lazy="loaded"] {
 }
 .tag:focus {
   outline: none;
+}
+.noMore {
+  color: white;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 </style>

@@ -13,6 +13,7 @@ export default new Vuex.Store({
     imageType: "images",
     getFavorites: false,
     backToHome: false,
+    searching: ''
   },
   mutations: {
     incrementPage(state, page) {
@@ -60,7 +61,7 @@ export default new Vuex.Store({
         let done = 1;
         let memes;
         let page = context.state.homePage;
-        console.log(page)
+       
         if (this.state.imageType == "images") {
           memes = [
             "memes",
@@ -143,7 +144,7 @@ export default new Vuex.Store({
                   .filter(x => x.height < 1000);
               }
 
-              noMP4.forEach((x, i, a) => {
+              noMP4.forEach(x => {
                 memeArray.push(x);
               });
 
@@ -164,8 +165,10 @@ export default new Vuex.Store({
         let tagArray = [];
         let len = tagArr.length;
         let page = context.state.page;
+        let searching = context.state.searching
+        
 
-        let done = 0;
+        let done = 1;
         for (let i = 0; i < tagArr.length; i++) {
           axios({
             method: "get",
@@ -177,7 +180,7 @@ export default new Vuex.Store({
             .then(response => {
               let images = response.data.data.items;
               let all = [];
-
+             
               images.forEach(x => {
                 let url = "";
 
@@ -209,7 +212,7 @@ export default new Vuex.Store({
                 });
               });
 
-              let tagsAdded = 0;
+              
               let noMP4;
 
               if (this.state.imageType == "images") {
@@ -224,22 +227,22 @@ export default new Vuex.Store({
 
               noMP4.forEach(x => {
                 tagArray.push(x);
-
-                tagsAdded++;
               });
-
-              if (tagsAdded == noMP4.length) {
-                done++;
+            
+              if (done == len) {
+                if(tagArray.length > 0) {
+                  resolve(tagArray);
+                }else{
+                  resolve(null)
+                }
+                
               }
+              done++;
             })
             .catch(function(error) {
               reject(error);
             })
-            .finally(() => {
-              if (done == len) {
-                resolve(tagArray);
-              }
-            });
+           
         }
       });
     },
@@ -323,8 +326,9 @@ export default new Vuex.Store({
     imageSearch(context, name) {
       return new Promise((resolve, reject) => {
         let page = context.state.homePage;
+        context.state.searching = name
         let all = [];
-        console.log(page)
+        
         axios({
           method: "get",
           url: `https://api.imgur.com/3/gallery/search/top/${page}?q=` + name,
