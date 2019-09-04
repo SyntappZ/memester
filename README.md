@@ -34,12 +34,12 @@ also learnt more about using api data."
 
  <div class="wrap">
 
-   <img src="https://user-images.githubusercontent.com/42116608/64271940-38d24a00-cf36-11e9-8b47-dfe463c12c21.png" width="150">
-   <img src="https://user-images.githubusercontent.com/42116608/64271941-38d24a00-cf36-11e9-8f73-552324eefacd.png" width="150">
-   <img src="https://user-images.githubusercontent.com/42116608/64271942-38d24a00-cf36-11e9-8088-d8bdb7268b8a.png" width="150">
-   <img src="https://user-images.githubusercontent.com/42116608/64271939-3839b380-cf36-11e9-9492-e34b16eaedd9.png" width="150">
-   <img src="https://user-images.githubusercontent.com/42116608/64271943-38d24a00-cf36-11e9-9162-1baa49c14a3c.png" width="150">
-   <img src="https://user-images.githubusercontent.com/42116608/64271944-396ae080-cf36-11e9-90a2-3d8465b405d6.png" width="150">
+   <img src="https://user-images.githubusercontent.com/42116608/64271940-38d24a00-cf36-11e9-8b47-dfe463c12c21.png" width="250">
+   <img src="https://user-images.githubusercontent.com/42116608/64271941-38d24a00-cf36-11e9-8f73-552324eefacd.png" width="250">
+   <img src="https://user-images.githubusercontent.com/42116608/64271942-38d24a00-cf36-11e9-8088-d8bdb7268b8a.png" width="250">
+   <img src="https://user-images.githubusercontent.com/42116608/64271939-3839b380-cf36-11e9-9492-e34b16eaedd9.png" width="250">
+   <img src="https://user-images.githubusercontent.com/42116608/64271943-38d24a00-cf36-11e9-9162-1baa49c14a3c.png" width="250">
+   <img src="https://user-images.githubusercontent.com/42116608/64271944-396ae080-cf36-11e9-90a2-3d8465b405d6.png" width="250">
  
   </div>
 
