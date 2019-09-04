@@ -41,3 +41,7 @@ cordova/www/
 
 # Production build
 www/
+
+
+# keystore
+memester.keystore
