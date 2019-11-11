@@ -28,7 +28,7 @@ also learnt more about using api data."
     - imgur API
 
 ## future improvements
-    - bug fixes and optimization
+    - optimization
 
 ## screens
 
